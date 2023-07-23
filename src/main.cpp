@@ -3,7 +3,7 @@
 
 Options getOptions(int argc, char* argv[]) {
     Options options;
-    options.windowTitle = "PS Viewer";
+    options.windowTitle = "Rendering Engine";
     options.windowWidth = 1920;
     options.windowHeight = 1080;
     options.windowResizable = false;
@@ -19,7 +19,7 @@ Options getOptions(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
     Options options = getOptions(argc, argv);
-    std::cout << std::filesystem::current_path() << std::endl;
+    std::cout << "current path = " << std::filesystem::current_path() << std::endl;
     try {
         Viewer viewer(options);
         viewer.run();

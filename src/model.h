@@ -21,6 +21,8 @@
 #include <vector>
 
 #include "material.h"
+#include "base/bounding_box.h"
+
 using namespace std;
 
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
@@ -32,6 +34,7 @@ public:
     vector<Textures> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
     vector<Mesh>    meshes;
     unique_ptr<Material> facetMaterial;
+    BoundingBox box;
     string directory;
     bool gammaCorrection;
     bool display = true;
@@ -106,6 +109,7 @@ private:
             vector.y = mesh->mVertices[i].y;
             vector.z = mesh->mVertices[i].z;
             vertex.Position = vector;
+            this->box+=vector;
             // normals
             if (mesh->HasNormals())
             {

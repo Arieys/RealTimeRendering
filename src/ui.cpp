@@ -102,7 +102,7 @@ void UI::SceneManagementGUI(Scene& scene)
         {
             for (int i = 0; i < scene.pointLights.size(); i++)
             {
-                std::string name = "Light" + std::to_string(i);
+                std::string name = "PointLight" + std::to_string(i);
                 ImVec4 temp;
                 if (ImGui::TreeNode(name.c_str()))
                 {
@@ -133,6 +133,28 @@ void UI::SceneManagementGUI(Scene& scene)
 
                     ImGui::TreePop();
                 }
+            }
+            for (int i = 0; i < scene.directionalLights.size(); i++)
+            {
+                std::string name = "DirectionalLight" + std::to_string(i);
+                ImVec4 temp;
+                if (ImGui::TreeNode(name.c_str()))
+                {
+                    glm::vec3* t = &scene.directionalLights[i].color;
+                    UI::ImVec4Assignment(temp, *t);
+                    ImGui::ColorEdit3("Color", (float*)&temp);
+                    UI::glmAssignment(temp, *t);
+
+                    t = &scene.directionalLights[i].position;
+                    UI::ImVec4Assignment(temp, *t);
+                    ImGui::SliderFloat3("Position", (float*)&temp, -30.0f, 30.0f);
+                    UI::glmAssignment(temp, *t);
+
+                    ImGui::SliderFloat("Intensity", (float*)&scene.directionalLights[i].intensity, 0.001f, 1.0f);
+                    ImGui::Separator();
+                    ImGui::TreePop();
+                }
+                    
             }
             ImGui::EndTabItem();
         }

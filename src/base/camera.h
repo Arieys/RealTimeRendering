@@ -2,10 +2,13 @@
 
 #include "frustum.h"
 #include "transform.h"
+#include "bounding_box.h"
 
 class Camera {
 public:
     Transform transform;
+    float znear;
+    float zfar;
 
 public:
     virtual ~Camera() = default;
@@ -21,8 +24,6 @@ class PerspectiveCamera : public Camera {
 public:
     float fovy;
     float aspect;
-    float znear;
-    float zfar;
 
 public:
     PerspectiveCamera(float fovy, float aspect, float znear, float zfar);
@@ -40,8 +41,6 @@ public:
     float right;
     float bottom;
     float top;
-    float znear;
-    float zfar;
 
 public:
     OrthographicCamera(float left, float right, float bottom, float top, float znear, float zfar);

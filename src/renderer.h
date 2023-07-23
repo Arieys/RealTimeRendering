@@ -35,19 +35,24 @@ public:
         screenHeight = height, screenWidth = width;
     }
 
-    void render(const Camera& camera, const Scene& scene, const Options& options);
+    void render(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene, const Options& options);
 
     ~Renderer();
 
 private:
     std::unique_ptr<GLSLProgram> _flatShader;
     std::unique_ptr<GLSLProgram> _phongShader;
+    std::unique_ptr<GLSLProgram> _csmShader;
     std::unique_ptr<GLSLProgram> _shadowShader;
     std::unique_ptr<GLSLProgram> _normalShader;
 
     int screenWidth;
     int screenHeight;
+    
+    //depth map resolution
+    const GLuint SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 
+    //for normal shadow map
     GLuint depthMapFBO;
     GLuint depthMap;
     GLuint planeVAO;
@@ -55,21 +60,37 @@ private:
 
     glm::mat4 lightSpaceMatrix;
 
+    //for cascade shadow map
+    std::vector<float> shadowCascadeLevels;
+    std::vector<glm::mat4> lightspace_matrics;
+
+    bool use_csm = true;
+
     void initShaders(const std::string& shaderBasePath);
 
     void initBackground();
 
-    void updateCamera(const Camera& camera);
+    void updateCamera(unique_ptr<PerspectiveCamera>& camera);
 
-    void updatePointLight(const PointLight& light);
+    void updateDirectionalLight(const DirectionalLight& light);
 
-    void genDepthMap(const PointLight& l, const std::vector<AssimpModel>& models, const Options& options);
+    void genDepthMap(const DirectionalLight &l, const std::vector<AssimpModel>& models, const Options& options);
 
-    void renderLight(const PointLight& pointlight);
+    void genCascadeDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera> &_camera, const std::vector<AssimpModel>& models, const Options& options);
+
+    std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);
+
+    glm::mat4 getLightSpaceMatrix(const float nearPlane, const float farPlane, std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
+
+    std::vector<glm::mat4> getLightSpaceMatrices(std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
+
+    void renderLight(const DirectionalLight& pointlight);
 
     void renderBackground();
 
     void renderFacets(const AssimpModel& model);
 
     void renderNormal(const AssimpModel& model);
+
+    void renderFacetCSM(const AssimpModel& model);
 };

@@ -20,7 +20,8 @@ Viewer::Viewer(const Options& options)
     _scene.reset(new Scene);
 
     // scene.lights
-    _scene->pointLights.push_back(PointLight());
+    //_scene->pointLights.push_back(PointLight());
+    _scene->directionalLights.push_back(DirectionalLight());
 
     // renderer
     _renderer.reset(new Renderer(getAssetFullPath("shader")));
@@ -75,9 +76,11 @@ void Viewer::renderFrame()
     };
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //always filled mode 
+    
+    
 
     _renderer->setScreenSize(this->_windowHeight, this->_windowWidth);
-    _renderer->render(*_camera, *_scene, options);
+    _renderer->render(_camera, *_scene, options);
 
     _ui->render(*_uiOptions, *_scene);
 }
