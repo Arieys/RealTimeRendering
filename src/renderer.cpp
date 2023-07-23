@@ -62,33 +62,42 @@ void Renderer::render(unique_ptr<PerspectiveCamera>& camera, const Scene& scene,
         }
     }
 
-    //render model
-    for (const auto& model : scene.models)
+    if (debug_shadow) 
     {
-        if (model.display == false)
-            continue;
-
-        if (options.showFacet)
+        renderDubugInfo();
+    }
+    else 
+    {
+     //render model
+        for (const auto& model : scene.models)
         {
-            if (use_csm) renderFacetCSM(model);
-            else renderFacets(model);
+            if (model.display == false)
+                continue;
+
+            if (options.showFacet)
+            {
+                if (use_csm) renderFacetCSM(model);
+                else renderFacets(model);
+            }
+
+            if (options.showNormal)
+            {
+                renderNormal(model);
+            }
         }
 
-        if (options.showNormal)
+         //render background
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //always filled mode 
+        if (use_csm) renderBackgroundCSM();
+        else renderBackground();
+        if (options.wire)
         {
-            renderNormal(model);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
         }
-    }
 
-     //render background
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //always filled mode 
-    renderBackground();
-    if (options.wire)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
+        renderLight(scene.directionalLights[0]);
     }
-
-    renderLight(scene.directionalLights[0]);
+   
 
     //delete shadow related frameBuffer
     if (options.useShadow)
@@ -162,11 +171,15 @@ void Renderer::initShaders(const std::string& shaderBasePath)
     const std::string normalFragShaderRelPath = shaderBasePath + "/normal/normal_visualization.frag";
     const std::string normalGeomShaderRelPath = shaderBasePath + "/normal/normal_visualization.geom";
 
+    const std::string debugVertShaderRelPath = shaderBasePath + "/csm/quadDebug.vert";
+    const std::string debugFragShaderRelPath = shaderBasePath + "/csm/quadDebug.frag";
+
     _flatShader.reset(new GLSLProgram);
     _phongShader.reset(new GLSLProgram);
     _shadowShader.reset(new GLSLProgram);
     _normalShader.reset(new GLSLProgram);
     _csmShader.reset(new GLSLProgram);
+    _debugShader.reset(new GLSLProgram);
 
     _flatShader->attachVertexShaderFromFile(flatVertShaderRelPath);
     _flatShader->attachFragmentShaderFromFile(flatFragShaderRelPath);
@@ -189,6 +202,10 @@ void Renderer::initShaders(const std::string& shaderBasePath)
     _csmShader->attachFragmentShaderFromFile(csmFragShaderRelPath);
     _csmShader->link();
 
+    _debugShader->attachVertexShaderFromFile(debugVertShaderRelPath);
+    _debugShader->attachFragmentShaderFromFile(debugFragShaderRelPath);
+    _debugShader->link();
+
 }
 
 void Renderer::renderFacets(const AssimpModel& model)
@@ -207,7 +224,7 @@ void Renderer::renderFacets(const AssimpModel& model)
         _phongShader->setUniformVec3("material.specular", material->ks);
         _phongShader->setUniformFloat("material.shininess", material->ns);
 
-        _phongShader->setUniformMat4("model", glm::mat4());
+        _phongShader->setUniformMat4("model", glm::mat4(1.0f));
         _phongShader->setUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
 
         bool use_texture_kd = false;
@@ -268,6 +285,42 @@ void Renderer::renderFacets(const AssimpModel& model)
     }
 }
 
+void Renderer::renderDubugInfo()
+{
+    _debugShader->use();
+    _debugShader->setUniformInt("layer", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, depthMap);
+    
+    {
+        unsigned int quadVAO, quadVBO;
+        float quadVertices[] = {
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+
+        glDeleteVertexArrays(1, &quadVAO);
+        glDeleteBuffers(1, &quadVBO);
+    }
+}
+
 void Renderer::renderFacetCSM(const AssimpModel& model)
 {
     for (const auto& mesh : model.meshes) {
@@ -287,7 +340,7 @@ void Renderer::renderFacetCSM(const AssimpModel& model)
 
         for (int i = 0; i < lightspace_matrics.size(); i++) {
             _csmShader->setUniformMat4("lightSpaceMatrices[" + std::to_string(i) + "]", lightspace_matrics[i]);
-            if(i < shadowCascadeLevels.size()) _csmShader->setUniformInt("cascadePlaneDistances[" + std::to_string(i) + "]", shadowCascadeLevels[i]);
+            if(i < shadowCascadeLevels.size()) _csmShader->setUniformFloat("cascadePlaneDistances[" + std::to_string(i) + "]", shadowCascadeLevels[i]);
         }
         _csmShader->setUniformInt("cascadeCount", shadowCascadeLevels.size());
 
@@ -364,6 +417,42 @@ void Renderer::renderNormal(const AssimpModel& model)
 
     _normalShader->unuse();
 
+}
+
+void Renderer::renderBackgroundCSM()
+{
+    PhongMaterial material;
+    material.ka = glm::vec3(0.1f, 0.1f, 0.1f);
+    material.kd = glm::vec3(0.5f, 0.5f, 0.5f);
+    material.ks = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    glm::mat4 model = glm::mat4(1.0f);
+    _csmShader->use();
+    _csmShader->setUniformMat4("model", model);
+
+    _csmShader->setUniformVec3("material.ambient", material.ka);
+    _csmShader->setUniformVec3("material.diffuse", material.kd);
+    _csmShader->setUniformVec3("material.specular", material.ks);
+    _csmShader->setUniformFloat("material.shininess", material.ns);
+
+    _csmShader->setUniformBool("use_texture_kd", false);
+    _csmShader->setUniformBool("use_texture_ks", false);
+    _csmShader->setUniformBool("use_texture_normal", false);
+
+    _csmShader->setUniformInt("shadowMap", 0);
+
+    for (int i = 0; i < lightspace_matrics.size(); i++) {
+        _csmShader->setUniformMat4("lightSpaceMatrices[" + std::to_string(i) + "]", lightspace_matrics[i]);
+        if (i < shadowCascadeLevels.size()) _csmShader->setUniformFloat("cascadePlaneDistances[" + std::to_string(i) + "]", shadowCascadeLevels[i]);
+    }
+    _csmShader->setUniformInt("cascadeCount", shadowCascadeLevels.size());
+
+    glBindVertexArray(planeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glBindVertexArray(0);
+    _csmShader->unuse();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void Renderer::renderBackground() 
@@ -559,7 +648,7 @@ void Renderer::genCascadeDepthMap(const DirectionalLight& l, std::unique_ptr<Per
     for (int i = 0; i < lightspace_matrics.size(); i++) {
         //Bind depth map to frame buffer
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, i);
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMap, 0, i);
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -571,6 +660,7 @@ void Renderer::genCascadeDepthMap(const DirectionalLight& l, std::unique_ptr<Per
         // render scene from light's point of view
         _shadowShader->use();
         _shadowShader->setUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
+        _shadowShader->setUniformMat4("model", glm::mat4(1.0f));
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -603,6 +693,7 @@ void Renderer::genCascadeDepthMap(const DirectionalLight& l, std::unique_ptr<Per
         glBindVertexArray(0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        _shadowShader->unuse();
 
 
         //reset view port
@@ -614,9 +705,7 @@ void Renderer::genCascadeDepthMap(const DirectionalLight& l, std::unique_ptr<Per
 
 glm::mat4 Renderer::getLightSpaceMatrix(const float nearPlane, const float farPlane, std::unique_ptr<PerspectiveCamera> &_camera, const DirectionalLight& l)
 {
-    const auto proj = glm::perspective(
-        glm::radians(_camera->fovy), (float)screenWidth / (float)screenHeight, nearPlane,
-        farPlane);
+    const auto proj = glm::perspective(_camera->fovy, _camera->aspect, nearPlane,farPlane);
     const auto corners = getFrustumCornersWorldSpace(proj, _camera->getViewMatrix());
 
     glm::vec3 center = glm::vec3(0, 0, 0);

@@ -50,16 +50,19 @@ uniform DirectionalLight dLight;
 
 uniform vec3 viewPos; 
 
+int layer;
+
 vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 float ShadowCalculation(vec4 fragPos, vec3 lightDir, vec3 normal)
 {
-    int layer  = -1;
+    layer  = -1;
     vec4 fragPosViewSpace = view * fragPos;
     float depthViewSpace = abs(fragPosViewSpace.z);
     for(int i = 0; i < cascadeCount; i++){
         if(depthViewSpace < cascadePlaneDistances[i]){
             layer = i;
+            break;
         }
     }
     if(layer == -1) layer = cascadeCount;
@@ -76,9 +79,10 @@ float ShadowCalculation(vec4 fragPos, vec3 lightDir, vec3 normal)
     float currentDepth = projCoords.z; //d(receiver)
     // calculate bias (based on depth map resolution and slope)
     //vec3 normal = normalize(fs_in.Normal);
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+    float bias = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);
     // check whether current frag pos is in shadow
-    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    //float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    //return shadow;
     float shadow = 0.0;
     vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
     // PCF PCSS
@@ -154,7 +158,7 @@ void main()
 
     // directional lighting
     vec3 result = vec3(0.0f,0.0f,0.0f);
-    result += CalcDirectionalLight(dLight, norm, fs_in.FragPos, viewDir);    
+    result += CalcDirectionalLight(dLight, norm, fs_in.FragPos, viewDir);   
     FragColor = vec4(result,1.0);
 }
 
@@ -181,10 +185,17 @@ vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 fragPos, vec
     {
         specular = light.specular * spec * texture(texture_specular1,fs_in.TexCoords).rgb;
     }
+    {
+        //layer visulization
+        //if(layer == 0) diffuse = vec3(1.0,0.0,0.0);
+        //else if(layer == 1) diffuse = vec3(0.0,1.0,0.0);
+        //else if(layer == 2) diffuse = vec3(0.0,0.0,1.0);
+        //else if(layer == 3) diffuse = vec3(0.0,1.0,1.0);
+        //else if(layer == 4) diffuse = vec3(1.0,1.0,0.0);
+    }
     ambient *= light.intensity;
     diffuse *= light.intensity;
     specular *= light.intensity;
 
-    if(shadow == 0.0) return vec3(0.0f,1.0f,1.0f);
     return (ambient + (1.0 - shadow) * (diffuse + specular));
 }

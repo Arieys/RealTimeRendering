@@ -45,6 +45,7 @@ private:
     std::unique_ptr<GLSLProgram> _csmShader;
     std::unique_ptr<GLSLProgram> _shadowShader;
     std::unique_ptr<GLSLProgram> _normalShader;
+    std::unique_ptr<GLSLProgram> _debugShader;
 
     int screenWidth;
     int screenHeight;
@@ -63,6 +64,8 @@ private:
     //for cascade shadow map
     std::vector<float> shadowCascadeLevels;
     std::vector<glm::mat4> lightspace_matrics;
+
+    bool debug_shadow = false;
 
     bool use_csm = true;
 
@@ -93,4 +96,8 @@ private:
     void renderNormal(const AssimpModel& model);
 
     void renderFacetCSM(const AssimpModel& model);
+
+    void renderBackgroundCSM();
+
+    void renderDubugInfo();
 };
