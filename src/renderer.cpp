@@ -55,54 +55,52 @@ void Renderer::render(unique_ptr<PerspectiveCamera>& camera, const Scene& scene,
         updateDirectionalLight(scene.directionalLights[0]);
         if (options.useShadow)
         {
-            if (use_csm) {
+            if (options.useCSM) {
                 genCascadeDepthMap(scene.directionalLights[0], camera, scene.models, options);
             }
             else genDepthMap(scene.directionalLights[0], scene.models, options);
         }
     }
 
-    if (debug_shadow) 
+    //render model
+    for (const auto& model : scene.models)
     {
-        renderDubugInfo();
+        if (model.display == false)
+            continue;
+
+        if (options.showFacet)
+        {
+            if (options.useCSM) {
+                if (options.CSMDebug) renderDubugInfo();
+                else renderFacetCSM(model);
+            }
+            else renderFacets(model);
+        }
+
+        if (options.showNormal)
+        {
+            renderNormal(model);
+        }
     }
-    else 
+
+        //render background
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //always filled mode 
+    if (options.useCSM) renderBackgroundCSM();
+    else renderBackground();
+    renderLight(scene.directionalLights[0]);
+    if (options.wire)
     {
-     //render model
-        for (const auto& model : scene.models)
-        {
-            if (model.display == false)
-                continue;
-
-            if (options.showFacet)
-            {
-                if (use_csm) renderFacetCSM(model);
-                else renderFacets(model);
-            }
-
-            if (options.showNormal)
-            {
-                renderNormal(model);
-            }
-        }
-
-         //render background
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //always filled mode 
-        if (use_csm) renderBackgroundCSM();
-        else renderBackground();
-        if (options.wire)
-        {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
-        }
-
-        renderLight(scene.directionalLights[0]);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
    
-
     //delete shadow related frameBuffer
     if (options.useShadow)
     {
-        glDeleteFramebuffers(1, &depthMapFBO);     
+        glDeleteFramebuffers(1, &depthMapFBO);      
         glDeleteTextures(1, &depthMap);
     }
 }
@@ -405,7 +403,7 @@ void Renderer::renderFacetCSM(const AssimpModel& model)
 void Renderer::renderNormal(const AssimpModel& model)
 {
     _normalShader->use();
-    //_normalShader->setUniformMat4("model", model.transform.getLocalMatrix());
+    _normalShader->setUniformMat4("model", glm::mat4(1.0f));
 
     for (const auto& mesh : model.meshes)
     {

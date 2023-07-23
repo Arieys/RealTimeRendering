@@ -35,13 +35,15 @@ public:
 
     bool show_scene   = true;
     bool show_body    = true;
-
+    bool show_option  = true;
 
     bool wantCaptureMouse() const;
 
     void SceneManagementGUI(Scene &scene);
 
     void MenuGUI(UIOptions& options, Scene& scene);
+
+    void SceneOptionGUI(Scene& scene, UIOptions& options);
 
     void ShowMenuFile(UIOptions& options, Scene& scene);
 

@@ -72,12 +72,10 @@ void Viewer::renderFrame()
         _uiOptions->displayFacet,
         _uiOptions->wire,
         _uiOptions->useShadow,
+        _uiOptions->useCSM,
+        _uiOptions->CSMDebug,
         _uiOptions->displayNormal
     };
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //always filled mode 
-    
-    
 
     _renderer->setScreenSize(this->_windowHeight, this->_windowWidth);
     _renderer->render(_camera, *_scene, options);

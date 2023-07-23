@@ -26,6 +26,8 @@ public:
         bool showFacet;
         bool wire;
         bool useShadow;
+        bool useCSM;
+        bool CSMDebug;
         bool showNormal;
     };
 
@@ -53,51 +55,37 @@ private:
     //depth map resolution
     const GLuint SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
 
-    //for normal shadow map
-    GLuint depthMapFBO;
-    GLuint depthMap;
+    //plane render
     GLuint planeVAO;
     GLuint planeVBO;
 
+    //for shadow map
+    GLuint depthMapFBO;
+    GLuint depthMap;
     glm::mat4 lightSpaceMatrix;
+    void genDepthMap(const DirectionalLight& l, const std::vector<AssimpModel>& models, const Options& options);
 
     //for cascade shadow map
     std::vector<float> shadowCascadeLevels;
     std::vector<glm::mat4> lightspace_matrics;
+    void genCascadeDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models, const Options& options);
+    std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);
+    glm::mat4 getLightSpaceMatrix(const float nearPlane, const float farPlane, std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
+    std::vector<glm::mat4> getLightSpaceMatrices(std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
+    void renderFacetCSM(const AssimpModel& model);
+    void renderBackgroundCSM();
+    void renderDubugInfo();
 
-    bool debug_shadow = false;
-
-    bool use_csm = true;
-
+    //base functions
     void initShaders(const std::string& shaderBasePath);
-
     void initBackground();
-
     void updateCamera(unique_ptr<PerspectiveCamera>& camera);
-
     void updateDirectionalLight(const DirectionalLight& light);
 
-    void genDepthMap(const DirectionalLight &l, const std::vector<AssimpModel>& models, const Options& options);
-
-    void genCascadeDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera> &_camera, const std::vector<AssimpModel>& models, const Options& options);
-
-    std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);
-
-    glm::mat4 getLightSpaceMatrix(const float nearPlane, const float farPlane, std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
-
-    std::vector<glm::mat4> getLightSpaceMatrices(std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
-
+    //phong_shading based functions
     void renderLight(const DirectionalLight& pointlight);
-
     void renderBackground();
-
     void renderFacets(const AssimpModel& model);
-
     void renderNormal(const AssimpModel& model);
 
-    void renderFacetCSM(const AssimpModel& model);
-
-    void renderBackgroundCSM();
-
-    void renderDubugInfo();
 };

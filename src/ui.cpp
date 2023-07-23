@@ -43,6 +43,8 @@ void UI::render(UIOptions& options, Scene& scene)
         //PSBodyManagementGUI(scene.models);
     if (show_scene)
         SceneManagementGUI(scene);
+    if (show_option)
+        SceneOptionGUI(scene, options);
 
     init_flag = false;
 
@@ -441,4 +443,33 @@ void UI::ShowAppMainMenuBar(UIOptions& options, Scene& scene)
 void UI::MenuGUI(UIOptions& options, Scene& scene)
 {
     ShowAppMainMenuBar(options, scene);
+}
+
+void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
+{
+    if (init_flag)
+    {
+        ImGui::SetNextWindowPos(ImVec2(IG_LM_X, IG_LM_Y));
+        ImGui::SetNextWindowSize(ImVec2(IG_LM_W, IG_LM_H));
+    }
+
+    if (ImGui::Begin("Rendering Option Manager"))
+    {
+        ImGui::Text("Display: ");
+        ImGui::Checkbox("facet", &options.displayFacet);
+        ImGui::SameLine();
+        ImGui::Checkbox("normal", &options.displayNormal);
+
+        ImGui::Text("Wire mode: ");
+        ImGui::SameLine();
+        ImGui::Checkbox("wire", &options.wire);
+
+        ImGui::Checkbox("useShadow", &options.useShadow);
+        ImGui::SameLine();
+        ImGui::Checkbox("useCSM", &options.useCSM);
+        ImGui::SameLine();
+        ImGui::Checkbox("CSMDebug", &options.CSMDebug);
+
+        ImGui::End();
+    }
 }
