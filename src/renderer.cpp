@@ -115,6 +115,11 @@ void Renderer::render(unique_ptr<PerspectiveCamera>& camera, const Scene& scene,
 void Renderer::updateCamera(unique_ptr<PerspectiveCamera>& camera)
 {
     _currentShader->updateCamera(camera);
+
+    _normalShader->use();
+    _normalShader->setUniformMat4("projection", camera->getProjectionMatrix());
+    _normalShader->setUniformMat4("view", camera->getViewMatrix());
+    _normalShader->unuse();
 }
 
 void Renderer::updateDirectionalLight(const DirectionalLight&light)
