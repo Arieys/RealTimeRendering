@@ -74,6 +74,7 @@ void Viewer::renderFrame()
         _uiOptions->useShadow,
         _uiOptions->useCSM,
         _uiOptions->CSMDebug,
+        _uiOptions->CSMLayerVisulization,
         _uiOptions->displayNormal
     };
 

@@ -465,11 +465,12 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
         ImGui::Checkbox("wire", &options.wire);
 
         ImGui::Checkbox("useShadow", &options.useShadow);
-        ImGui::SameLine();
+
         ImGui::Checkbox("useCSM", &options.useCSM);
         ImGui::SameLine();
+        ImGui::Checkbox("CSMLayerVisulization", &options.CSMLayerVisulization);
+        ImGui::SameLine();
         ImGui::Checkbox("CSMDebug", &options.CSMDebug);
-
         ImGui::End();
     }
 }

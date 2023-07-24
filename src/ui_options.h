@@ -7,5 +7,6 @@ struct UIOptions
     bool useShadow = true;
     bool useCSM = true;
     bool CSMDebug = false;
+    bool CSMLayerVisulization = false;
     bool displayNormal = false;
 };

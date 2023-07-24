@@ -20,6 +20,8 @@ uniform bool use_texture_ks;
 uniform bool use_texture_normal;
 uniform bool use_texture_height;
 
+uniform bool LayerVisulization;
+
 //fixed length, up to 16 cascade level
 uniform mat4 lightSpaceMatrices[16];
 uniform float cascadePlaneDistances[16];
@@ -185,13 +187,14 @@ vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 fragPos, vec
     {
         specular = light.specular * spec * texture(texture_specular1,fs_in.TexCoords).rgb;
     }
+    if(LayerVisulization)
     {
         //layer visulization
-        //if(layer == 0) diffuse = vec3(1.0,0.0,0.0);
-        //else if(layer == 1) diffuse = vec3(0.0,1.0,0.0);
-        //else if(layer == 2) diffuse = vec3(0.0,0.0,1.0);
-        //else if(layer == 3) diffuse = vec3(0.0,1.0,1.0);
-        //else if(layer == 4) diffuse = vec3(1.0,1.0,0.0);
+        if(layer == 0) diffuse = vec3(1.0,0.0,0.0);
+        else if(layer == 1) diffuse = vec3(0.0,1.0,0.0);
+        else if(layer == 2) diffuse = vec3(0.0,0.0,1.0);
+        else if(layer == 3) diffuse = vec3(0.0,1.0,1.0);
+        else if(layer == 4) diffuse = vec3(1.0,1.0,0.0);
     }
     ambient *= light.intensity;
     diffuse *= light.intensity;

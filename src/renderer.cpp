@@ -72,7 +72,9 @@ void Renderer::render(unique_ptr<PerspectiveCamera>& camera, const Scene& scene,
         {
             if (options.useCSM) {
                 if (options.CSMDebug) renderDubugInfo();
-                else renderFacetCSM(model);
+                else {
+                    renderFacetCSM(model,options);
+                }
             }
             else renderFacets(model);
         }
@@ -319,7 +321,7 @@ void Renderer::renderDubugInfo()
     }
 }
 
-void Renderer::renderFacetCSM(const AssimpModel& model)
+void Renderer::renderFacetCSM(const AssimpModel& model, const Options& options)
 {
     for (const auto& mesh : model.meshes) {
         // bind appropriate textures
@@ -334,6 +336,7 @@ void Renderer::renderFacetCSM(const AssimpModel& model)
         _csmShader->setUniformVec3("material.diffuse", material->kd);
         _csmShader->setUniformVec3("material.specular", material->ks);
         _csmShader->setUniformFloat("material.shininess", material->ns);
+        _csmShader->setUniformBool("LayerVisulization", options.CSMLayerVis);
         _csmShader->setUniformMat4("model", glm::mat4(1.0f));
 
         for (int i = 0; i < lightspace_matrics.size(); i++) {

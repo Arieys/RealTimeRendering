@@ -28,6 +28,7 @@ public:
         bool useShadow;
         bool useCSM;
         bool CSMDebug;
+        bool CSMLayerVis;
         bool showNormal;
     };
 
@@ -72,7 +73,7 @@ private:
     std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);
     glm::mat4 getLightSpaceMatrix(const float nearPlane, const float farPlane, std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
     std::vector<glm::mat4> getLightSpaceMatrices(std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
-    void renderFacetCSM(const AssimpModel& model);
+    void renderFacetCSM(const AssimpModel& model, const Options& options);
     void renderBackgroundCSM();
     void renderDubugInfo();
 
