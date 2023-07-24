@@ -68,7 +68,7 @@ void Viewer::renderFrame()
     showFpsInWindowTitle();
     clearScreen();
 
-    Renderer::Options options{
+    RendererOptions options{
         _uiOptions->displayFacet,
         _uiOptions->wire,
         _uiOptions->useShadow,

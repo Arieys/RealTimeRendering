@@ -456,6 +456,7 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
     if (ImGui::Begin("Rendering Option Manager"))
     {
         ImGui::Text("Display: ");
+        ImGui::SameLine();
         ImGui::Checkbox("facet", &options.displayFacet);
         ImGui::SameLine();
         ImGui::Checkbox("normal", &options.displayNormal);
@@ -463,9 +464,12 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
         ImGui::Text("Wire mode: ");
         ImGui::SameLine();
         ImGui::Checkbox("wire", &options.wire);
-
+        
+        ImGui::Text("Shadow: ");
+        ImGui::SameLine();
         ImGui::Checkbox("useShadow", &options.useShadow);
 
+        ImGui::Text("Advanced Shadow: ");
         ImGui::Checkbox("useCSM", &options.useCSM);
         ImGui::SameLine();
         ImGui::Checkbox("CSMLayerVisulization", &options.CSMLayerVisulization);
