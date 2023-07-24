@@ -75,7 +75,7 @@ void PhongShader::renderFacet(const AssimpModel& model, const RendererOptions& o
         _shader->unuse();
     }
 }
-void PhongShader::renderBackground(GLuint planeVAO, GLuint planeVBO)
+void PhongShader::renderBackground()
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //always filled mode 
 
@@ -108,7 +108,6 @@ void PhongShader::renderBackground(GLuint planeVAO, GLuint planeVBO)
 
 void PhongShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models, const RendererOptions& options)
 {
-
     glEnable(GL_DEPTH_TEST);
     glCullFace(GL_FRONT);
     //Generate frame buffer object
@@ -180,7 +179,10 @@ void PhongShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspec
             }
         }
     }
-
+    //render background
+    _shadowShader->setUniformMat4("model", glm::mat4(1.0f));
+    glBindVertexArray(planeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -271,7 +273,7 @@ void CSMShader::renderFacet(const AssimpModel& model, const RendererOptions& opt
         _shader->unuse();
     }
 }
-void CSMShader::renderBackground(GLuint planeVAO, GLuint planeVBO)
+void CSMShader::renderBackground()
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //always filled mode 
 

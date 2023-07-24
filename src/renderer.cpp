@@ -51,7 +51,7 @@ void Renderer::render(unique_ptr<PerspectiveCamera>& camera, const Scene& scene,
 
     //update screen size
     _currentShader->setScreenSize(this->screenWidth, this->screenHeight);
-
+    _currentShader->setBackgroundVAOVBO(this->planeVAO, this->planeVBO);
     // update camera
     updateCamera(camera);
 
@@ -95,7 +95,7 @@ void Renderer::render(unique_ptr<PerspectiveCamera>& camera, const Scene& scene,
     renderLight(scene.directionalLights[0]);
 
     //render background
-    _currentShader->renderBackground(this->planeVAO,this->planeVBO);
+    _currentShader->renderBackground();
     
     //set wire option
     if (options.wire)

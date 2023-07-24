@@ -11,6 +11,9 @@ public:
 	std::unique_ptr<GLSLProgram> _shadowShader;
 	int screenWidth;
 	int screenHeight;
+	//plane render
+	GLuint planeVAO;
+	GLuint planeVBO;
 	Shader(int width, int height, const std::string& shaderBasePath, const std::string vs_path, const std::string fs_path, const std::string gs_path = std::string(""))
 	{
 		screenWidth = width;
@@ -26,6 +29,11 @@ public:
 		_shader->attachFragmentShaderFromFile(FragShaderRelPath);
 		if(!gs_path.empty()) _shader->attachGeometryShaderFromFile(GeomShaderRelPath);
 		_shader->link();
+	}
+
+	void setBackgroundVAOVBO(GLuint vao, GLuint vbo)
+	{
+		this->planeVAO = vao, this->planeVBO = vbo;
 	}
 
 	void setScreenSize(int width, int height)
@@ -53,7 +61,7 @@ public:
 		_shader->unuse();
 	}
 	virtual void renderFacet(const AssimpModel& model, const RendererOptions& options) = 0;
-	virtual void renderBackground(GLuint planeVAO, GLuint planeVBO) = 0;
+	virtual void renderBackground() = 0;
 	virtual void genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models, const RendererOptions& options){} //default gen no shadow map
 	virtual void deleteBuffer(){}
 };
@@ -67,7 +75,7 @@ public:
 		initShadowShader(shaderBasePath);
 	}
 	virtual void renderFacet(const AssimpModel& model, const RendererOptions& options);
-	virtual void renderBackground(GLuint planeVAO, GLuint planeVBO);
+	virtual void renderBackground();
 	~PhongShader()
 	{
 	}
@@ -154,7 +162,7 @@ public:
 		initOtherShader(shaderBasePath);
 	}
 	virtual void renderFacet(const AssimpModel& model, const RendererOptions& options);
-	virtual void renderBackground(GLuint planeVAO, GLuint planeVBO);
+	virtual void renderBackground();
 	virtual void deleteBuffer()
 	{
 		//delete shadow related frameBuffer
