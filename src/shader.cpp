@@ -16,7 +16,7 @@ void PhongShader::renderFacet(const AssimpModel& model, const RendererOptions& o
         _shader->setUniformVec3("material.specular", material->ks);
         _shader->setUniformFloat("material.shininess", material->ns);
 
-        _shader->setUniformMat4("model", glm::mat4(1.0f));
+        _shader->setUniformMat4("model", model.transform.getLocalMatrix());
         _shader->setUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
 
         bool use_texture_kd = false;
@@ -169,9 +169,10 @@ void PhongShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspec
         {
             if (model.display == false)
                 continue;
-            //_shadowShader->setUniformMat4("model", model.transform.getLocalMatrix());
+            _shadowShader->setUniformMat4("model", model.transform.getLocalMatrix());
             for (const auto& mesh : model.meshes)
             {
+
                 // draw mesh
                 glBindVertexArray(mesh.VAO);
                 glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices.size()), GL_UNSIGNED_INT, 0);
@@ -209,7 +210,7 @@ void CSMShader::renderFacet(const AssimpModel& model, const RendererOptions& opt
         _shader->setUniformVec3("material.specular", material->ks);
         _shader->setUniformFloat("material.shininess", material->ns);
         _shader->setUniformBool("LayerVisulization", options.CSMLayerVis);
-        _shader->setUniformMat4("model", glm::mat4(1.0f));
+        _shader->setUniformMat4("model", model.transform.getLocalMatrix());
 
         for (int i = 0; i < lightspace_matrics.size(); i++) {
             _shader->setUniformMat4("lightSpaceMatrices[" + std::to_string(i) + "]", lightspace_matrics[i]);
@@ -357,7 +358,6 @@ void CSMShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspecti
         // render scene from light's point of view
         _shadowShader->use();
         _shadowShader->setUniformMat4("lightSpaceMatrix", lightSpaceMatrix);
-        _shadowShader->setUniformMat4("model", glm::mat4(1.0f));
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -372,7 +372,7 @@ void CSMShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspecti
             {
                 if (model.display == false)
                     continue;
-                //_shadowShader->setUniformMat4("model", model.transform.getLocalMatrix());
+                _shadowShader->setUniformMat4("model", model.transform.getLocalMatrix());
                 for (const auto& mesh : model.meshes)
                 {
                     // draw mesh
@@ -382,7 +382,10 @@ void CSMShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspecti
                 }
             }
         }
-
+        //render background
+        _shadowShader->setUniformMat4("model", glm::mat4(1.0f));
+        glBindVertexArray(planeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

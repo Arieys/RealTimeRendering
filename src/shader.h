@@ -2,7 +2,7 @@
 #include "base/glsl_program.h"
 #include "renderer_options.h"
 #include "model.h"
-#include "base/camera.h"]
+#include "base/camera.h"
 #include "base/light.h"
 class Shader
 {
@@ -12,13 +12,12 @@ public:
 	int screenWidth;
 	int screenHeight;
 	//plane render
-	GLuint planeVAO;
-	GLuint planeVBO;
+	GLuint planeVAO = 0;
+	GLuint planeVBO = 0;
 	Shader(int width, int height, const std::string& shaderBasePath, const std::string vs_path, const std::string fs_path, const std::string gs_path = std::string(""))
 	{
 		screenWidth = width;
 		screenHeight = height;
-		std::cout << shaderBasePath << std::endl;
 		const std::string VertShaderRelPath = shaderBasePath + vs_path;
 		const std::string FragShaderRelPath = shaderBasePath + fs_path;
 		const std::string GeomShaderRelPath = shaderBasePath + gs_path;

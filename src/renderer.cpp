@@ -120,6 +120,11 @@ void Renderer::updateCamera(unique_ptr<PerspectiveCamera>& camera)
     _normalShader->setUniformMat4("projection", camera->getProjectionMatrix());
     _normalShader->setUniformMat4("view", camera->getViewMatrix());
     _normalShader->unuse();
+
+    _flatShader->use();
+    _flatShader->setUniformMat4("projection", camera->getProjectionMatrix());
+    _flatShader->setUniformMat4("view", camera->getViewMatrix());
+    _flatShader->unuse();
 }
 
 void Renderer::updateDirectionalLight(const DirectionalLight&light)
@@ -163,7 +168,7 @@ void Renderer::initShaders(const std::string& shaderBasePath)
 void Renderer::renderNormal(const AssimpModel& model)
 {
     _normalShader->use();
-    _normalShader->setUniformMat4("model", glm::mat4(1.0f));
+    _normalShader->setUniformMat4("model", model.transform.getLocalMatrix());
 
     for (const auto& mesh : model.meshes)
     {
@@ -187,7 +192,6 @@ void Renderer::renderLight(const DirectionalLight& light)
         temp[0]     = light.position.x;
         temp[1]     = light.position.y;
         temp[2]     = light.position.z;
-
         GLuint light_vao, light_vbo;
         glGenVertexArrays(1, &light_vao);
         glGenBuffers(1, &light_vbo);

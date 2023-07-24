@@ -22,6 +22,7 @@
 
 #include "material.h"
 #include "base/bounding_box.h"
+#include "base/transform.h"
 
 using namespace std;
 
@@ -36,6 +37,7 @@ public:
     unique_ptr<Material> facetMaterial;
     BoundingBox box;
     string directory;
+    Transform transform;
     bool gammaCorrection;
     bool display = true;
 
@@ -208,6 +210,11 @@ private:
             }
         }
         return textures;
+    }
+
+    void updateBoundingBox()
+    {
+
     }
 };
 #endif

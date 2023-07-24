@@ -6,6 +6,7 @@
 #include "ui_options.h"
 #include "model.h"
 #include "scene.h"
+#include "base/camera.h"
 
 #include <string>
 //IMGUI window position
@@ -39,7 +40,7 @@ public:
 
     bool wantCaptureMouse() const;
 
-    void SceneManagementGUI(Scene &scene);
+    void SceneManagementGUI(Scene &scene, unique_ptr<PerspectiveCamera>& camera);
 
     void MenuGUI(UIOptions& options, Scene& scene);
 
@@ -49,7 +50,7 @@ public:
 
     void ShowAppMainMenuBar(UIOptions& options, Scene& scene);
 
-    void render(UIOptions& options, Scene &scene);
+    void render(unique_ptr<PerspectiveCamera>& camera, UIOptions& options, Scene &scene);
 
     static void ImVec4Assignment(ImVec4& v1, glm::vec3& v2)
     {

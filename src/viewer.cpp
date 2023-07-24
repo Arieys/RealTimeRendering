@@ -81,7 +81,7 @@ void Viewer::renderFrame()
     _renderer->setScreenSize(this->_windowHeight, this->_windowWidth);
     _renderer->render(_camera, *_scene, options);
 
-    _ui->render(*_uiOptions, *_scene);
+    _ui->render(_camera, *_uiOptions, *_scene);
 }
 
 void Viewer::clearScreen()

@@ -31,7 +31,7 @@ bool UI::wantCaptureMouse() const
     return ImGui::GetIO().WantCaptureMouse;
 }
 
-void UI::render(UIOptions& options, Scene& scene)
+void UI::render(unique_ptr<PerspectiveCamera>& camera, UIOptions& options, Scene& scene)
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -42,7 +42,7 @@ void UI::render(UIOptions& options, Scene& scene)
     if (show_body)
         //PSBodyManagementGUI(scene.models);
     if (show_scene)
-        SceneManagementGUI(scene);
+        SceneManagementGUI(scene, camera);
     if (show_option)
         SceneOptionGUI(scene, options);
 
@@ -52,7 +52,7 @@ void UI::render(UIOptions& options, Scene& scene)
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void UI::SceneManagementGUI(Scene& scene)
+void UI::SceneManagementGUI(Scene& scene, unique_ptr<PerspectiveCamera>& camera)
 {
     if (init_flag)
     {
@@ -64,9 +64,50 @@ void UI::SceneManagementGUI(Scene& scene)
 
     if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None))
     {
+        if (ImGui::BeginTabItem("Models"))
+        {
+            //show model property
+            for (int i = 0; i < scene.models.size(); i++) {
+                if (ImGui::TreeNode(("model " + std::to_string(i)).c_str()))
+                {
+                    ImVec4 temp;
+                    glm::vec3* t = nullptr;
+                    t = &scene.models[i].transform.position;
+                    UI::ImVec4Assignment(temp, *t);
+                    ImGui::SliderFloat3("Position", (float*)&temp, -30.0f, 30.0f);
+                    UI::glmAssignment(temp, *t);
+
+                    t = &scene.models[i].transform.scale;
+                    UI::ImVec4Assignment(temp, *t);
+                    ImGui::SliderFloat3("Scale", (float*)&temp, 0.01f, 10.0f);
+                    UI::glmAssignment(temp, *t);
+
+                    //todo : to adjust rotation in scene
+                    //t = &scene.models[i].transform.rotation;
+                    //UI::ImVec4Assignment(temp, *t);
+                    //ImGui::SliderFloat3("Rotation", (float*)&temp, -1.0f, 1.0f);
+                    //UI::glmAssignment(temp, *t);
+                    ImGui::TreePop();
+                }
+            }
+            ImGui::EndTabItem();
+        }
         if (ImGui::BeginTabItem("Cameras"))
         {
             //show camera property
+            ImVec4 temp;
+            glm::vec3* t = nullptr;
+            t = &camera->transform.position;
+            UI::ImVec4Assignment(temp, *t);
+            ImGui::SliderFloat3("Position", (float*)&temp, -30.0f, 30.0f);
+            UI::glmAssignment(temp, *t);
+
+            
+            ImGui::SliderFloat("fovy", (float*)&camera->fovy, 0.1f, 45.0f);
+            ImGui::SliderFloat("aspect", (float*)&camera->aspect, 0.1f, 45.0f);
+            ImGui::SliderFloat("znear", (float*)&camera->znear, 0.1f, 10.0f);
+            ImGui::SliderFloat("zfar", (float*)&camera->zfar, 0.1f, 1000.0f);
+
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Material"))
