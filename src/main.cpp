@@ -1,5 +1,7 @@
 #include "viewer.h"
+#include "config.h"
 #include <filesystem>
+#include <string>
 
 Options getOptions(int argc, char* argv[]) {
     Options options;
@@ -11,7 +13,7 @@ Options getOptions(int argc, char* argv[]) {
     options.msaa = true;
     options.glVersion = {4, 6};
     options.backgroundColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    options.assetRootDir = "../../../../media/";
+    options.assetRootDir = ROOT_PATH + "/media/"s;
     options.argc = argc;
     options.argv = argv;
     return options;
