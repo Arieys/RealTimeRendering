@@ -335,120 +335,6 @@ void UI::ShowAppMainMenuBar(UIOptions& options, Scene& scene)
             }
             ImGui::EndMenu();
         }
-        //Modeling operation
-        if (ImGui::BeginMenu("Modeling"))
-        {
-            if (ImGui::BeginMenu("CreateEntity"))
-            //create minimum entity
-            {
-                if (ImGui::MenuItem("Solid"))
-                {
-                }
-                if (ImGui::MenuItem("Region"))
-                {
-                }
-                if (ImGui::MenuItem("Shell"))
-                {
-                }
-                if (ImGui::MenuItem("Face"))
-                {
-                }
-                if (ImGui::MenuItem("Edge"))
-                {
-                }
-                if (ImGui::MenuItem("Half_Edge"))
-                {
-                }
-                if (ImGui::MenuItem("Vertex"))
-                {
-                }
-                if (ImGui::MenuItem("Node"))
-                {
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("CreateVoxel"))
-            //create voxel entity
-            {
-                if (ImGui::MenuItem("Block"))
-                {
-                }
-                if (ImGui::MenuItem("Cone"))
-                {
-                }
-                if (ImGui::MenuItem("Prism"))
-                {
-                }
-                if (ImGui::MenuItem("Cylinder"))
-                {
-                }
-                if (ImGui::MenuItem("Sphere"))
-                {
-                }
-                if (ImGui::MenuItem("Torus"))
-                {
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("BoolOperation"))
-            //bool op
-            {
-                if (ImGui::MenuItem("Union"))
-                {
-                }
-                if (ImGui::MenuItem("Intersection"))
-                {
-                }
-                if (ImGui::MenuItem("Subtraction"))
-                {
-                }
-                if (ImGui::MenuItem("Chop"))
-                {
-                }
-                if (ImGui::MenuItem("Nonreg_Union"))
-                {
-                }
-                if (ImGui::MenuItem("Nonreg_Intersection"))
-                {
-                }
-                if (ImGui::MenuItem("Nonreg_Substraction"))
-                {
-                }
-                if (ImGui::MenuItem("Nonreg_Chop"))
-                {
-                }
-                ImGui::EndMenu();
-            }
-            if (ImGui::MenuItem("Extrude"))
-            //select entity
-            {
-            }
-            if (ImGui::MenuItem("Sweep"))
-            //select entity
-            {
-            }
-            if (ImGui::MenuItem("Chamfer"))
-            //select entity
-            {
-            }
-            if (ImGui::MenuItem("Fillet"))
-            //select entity
-            {
-            }
-            if (ImGui::MenuItem("Select"))
-            //select entity
-            {
-            }
-            if (ImGui::MenuItem("Delete"))
-            //Delete selected entity
-            {
-            }
-            if (ImGui::MenuItem("Import"))
-            //Delete selected entity
-            {
-            }
-            ImGui::EndMenu();
-        }
         if (ImGui::BeginMenu("Scene"))
         {
             if (ImGui::MenuItem("AddLight"))
@@ -466,9 +352,9 @@ void UI::ShowAppMainMenuBar(UIOptions& options, Scene& scene)
             {
                 show_scene = !show_scene;
             }
-            if (ImGui::MenuItem("body management"))
+            if (ImGui::MenuItem("rendering option GUI"))
             {
-                show_body = !show_body;
+                show_option = !show_option;
             }
             ImGui::EndMenu();
         }
@@ -515,7 +401,7 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
         ImGui::SameLine();
         ImGui::Checkbox("CSMLayerVisulization", &options.CSMLayerVisulization);
         ImGui::SameLine();
-        ImGui::Checkbox("CSMDebug", &options.CSMDebug);
-        ImGui::End();
+        ImGui::Checkbox("CSMDebug", &options.CSMDebug);    
     }
+    ImGui::End();
 }
