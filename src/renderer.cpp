@@ -14,27 +14,29 @@ Renderer::~Renderer()
 
 void Renderer::render(unique_ptr<PerspectiveCamera>& camera, const Scene& scene, const UIOptions& options)
 {
+    _options = std::make_shared<UIOptions>(options);
+
     if (options.renderType == RenderType::FORAWRD)
     {
-        forwardShading(camera, scene, options);
+        forwardShading(camera, scene);
     }
     else if (options.renderType == RenderType::DEFERRED)
     {
-        deferredShading(camera, scene, options);
+        deferredShading(camera, scene);
     }
 }
 
-void Renderer::forwardShading(unique_ptr<PerspectiveCamera>& camera, const Scene& scene, const UIOptions& options)
+void Renderer::forwardShading(unique_ptr<PerspectiveCamera>& camera, const Scene& scene)
 {
     //set current main pipeline shader
-    if (options.useShadow) {
-        if (options.useCSM) _currentShader = _csmShader;
+    if (_options->useShadow) {
+        if (_options->useCSM) _currentShader = _csmShader;
         else _currentShader = _phongShader;
     }
     else _currentShader = _phongShader;
 
     //update ui options
-    _currentShader->setRenderOptions(options);
+    _currentShader->setRenderOptions(*_options);
 
     //update screen size
     _currentShader->setScreenSize(this->screenWidth, this->screenHeight);
@@ -54,7 +56,7 @@ void Renderer::forwardShading(unique_ptr<PerspectiveCamera>& camera, const Scene
     }
 
     //gen shadow map
-    if (options.useShadow)
+    if (_options->useShadow)
     {
         _currentShader->genDepthMap(scene.directionalLights[0], camera, scene.models);
     }
@@ -65,15 +67,15 @@ void Renderer::forwardShading(unique_ptr<PerspectiveCamera>& camera, const Scene
         if (model.display == false)
             continue;
 
-        if (options.displayFacet)
+        if (_options->displayFacet)
         {
-            if (options.useShadow && options.useCSM && options.CSMDebug) {
+            if (_options->useShadow && _options->useCSM && _options->CSMDebug) {
                 std::dynamic_pointer_cast<CSMShader>(_currentShader)->renderDubugInfo();
             }
             else _currentShader->renderFacet(model);
         }
 
-        if (options.displayNormal)
+        if (_options->displayNormal)
         {
             renderNormal(model);
         }
@@ -85,7 +87,7 @@ void Renderer::forwardShading(unique_ptr<PerspectiveCamera>& camera, const Scene
     _currentShader->renderBackground();
 
     //set wire option
-    if (options.wire)
+    if (_options->wire)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
@@ -94,12 +96,12 @@ void Renderer::forwardShading(unique_ptr<PerspectiveCamera>& camera, const Scene
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    if (options.useShadow) {
+    if (_options->useShadow) {
         _currentShader->deleteBuffer();
     }
 }
 
-void Renderer::deferredShading(unique_ptr<PerspectiveCamera>& camera, const Scene& scene, const UIOptions& options)
+void Renderer::deferredShading(unique_ptr<PerspectiveCamera>& camera, const Scene& scene)
 {
     //update camera
     _deferredShader->use();
@@ -107,10 +109,12 @@ void Renderer::deferredShading(unique_ptr<PerspectiveCamera>& camera, const Scen
     _deferredShader->setUniformMat4("view", camera->getViewMatrix());
     _deferredShader->unuse();
 
-
     _gBuffer.reset(new GBuffer());
 
-    _gBuffer->Init(screenWidth, screenHeight);
+    if (!_gBuffer->Init(screenWidth, screenHeight))
+    {
+        cout << "init gbuufer failed" << endl;
+    }
 
     _gBuffer->BindForWriting();
 
@@ -121,14 +125,20 @@ void Renderer::deferredShading(unique_ptr<PerspectiveCamera>& camera, const Scen
         if (model.display == false)
             continue;
 
-        if (options.displayFacet)
+        if (_options->displayFacet)
         {
             renderGbuffer(model);
         }
 
     }
     
-    renderGbufferToScreen();
+    //bind current drawing framebuffer to default framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    if (_options->displayGBuffer)
+    {
+        renderGbufferToScreen();
+    }
 }
 
 void Renderer::updateCamera(unique_ptr<PerspectiveCamera>& camera)
@@ -277,9 +287,6 @@ void Renderer::renderLight(const DirectionalLight& light)
 
 void Renderer::renderGbufferToScreen()
 {
-    //bind current drawing framebuffer to default framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     if (_gBuffer == nullptr) {
         std::cout << "render gbuffer error : _gBuffer nullptr" << std::endl;
     }
@@ -288,20 +295,55 @@ void Renderer::renderGbufferToScreen()
     _gBuffer->BindForReading();
 
     //copy framebuffer 
-    GLsizei HalfWidth = (GLsizei)(this->screenWidth / 2.0f);
-    GLsizei HalfHeight = (GLsizei)(this->screenHeight / 2.0f);
-    _gBuffer->SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
-    glBlitFramebuffer(0, 0, screenWidth, screenHeight,
-        0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    _gBuffer->SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
-    glBlitFramebuffer(0, 0, screenWidth, screenHeight,
-        0, HalfHeight, HalfWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    _gBuffer->SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
-    glBlitFramebuffer(0, 0, screenWidth, screenHeight,
-        HalfWidth, HalfHeight, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    _gBuffer->SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_TEXCOORD);
-    glBlitFramebuffer(0, 0, screenWidth, screenHeight,
-        HalfWidth, 0, screenWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+    switch (_options->gbufferDisplayType) {
+    case GbufferDisplayType::POSITION:
+        _gBuffer->SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
+        glBlitFramebuffer(0, 0, screenWidth, screenHeight,
+            0, 0, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        break;
+    case GbufferDisplayType::DIFFUSE:
+        _gBuffer->SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
+        glBlitFramebuffer(0, 0, screenWidth, screenHeight,
+            0, 0, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        break;
+    case GbufferDisplayType::NORMAL:
+        _gBuffer->SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
+        glBlitFramebuffer(0, 0, screenWidth, screenHeight,
+            0, 0, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        break;
+    case GbufferDisplayType::TEXCOORDS:
+        _gBuffer->SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_TEXCOORD);
+        glBlitFramebuffer(0, 0, screenWidth, screenHeight,
+            0, 0, screenWidth, screenHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        break;
+    }
+
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+        const char* errorString;
+        switch (error) {
+        case GL_INVALID_ENUM:
+            errorString = "GL_INVALID_ENUM";
+            break;
+        case GL_INVALID_VALUE:
+            errorString = "GL_INVALID_VALUE";
+            break;
+        case GL_INVALID_OPERATION:
+            errorString = "GL_INVALID_OPERATION";
+            break;
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            errorString = "GL_INVALID_FRAMEBUFFER_OPERATION";
+            break;
+        case GL_OUT_OF_MEMORY:
+            errorString = "GL_OUT_OF_MEMORY";
+            break;
+        default:
+            errorString = "Unknown error";
+            break;
+        }
+        cout << errorString << endl;
+    }
 }
 
 void Renderer::renderGbuffer(const AssimpModel& model)
@@ -310,10 +352,54 @@ void Renderer::renderGbuffer(const AssimpModel& model)
         _deferredShader->use();
         _deferredShader->setUniformMat4("model", model.transform.getLocalMatrix());
 
+        unsigned int diffuseNr = 1;
+        unsigned int specularNr = 1;
+        unsigned int normalNr = 1;
+        unsigned int heightNr = 1;
+
+        const PhongMaterial* material = static_cast<PhongMaterial*>(model.facetMaterial.get());
+
+        _deferredShader->setUniformVec3("material.diffuse", material->kd);
+
+        bool use_texture_kd = false;
+        bool use_texture_normal = false;
+
+        for (unsigned int i = 0; i < mesh.textures.size(); i++)
+        {
+            glActiveTexture(GL_TEXTURE0 + i + 1); // active proper texture unit before binding
+            // retrieve texture number (the N in diffuse_textureN)
+            string number;
+            string name = mesh.textures[i].type;
+            if (name == "texture_diffuse")
+            {
+                number = std::to_string(diffuseNr++);
+                use_texture_kd = true;
+                // now set the sampler to the correct texture unit
+                _deferredShader->setUniformInt((name + number).c_str(), i + 1);
+            }
+            else if (name == "texture_normal")
+            {
+                number = std::to_string(normalNr++); // transfer unsigned int to string
+                use_texture_normal = true;
+                // now set the sampler to the correct texture unit
+                _deferredShader->setUniformInt((name + number).c_str(), i + 1);
+            }
+
+            // and finally bind the texture
+            glBindTexture(GL_TEXTURE_2D, mesh.textures[i].id);
+        }
+
+        _deferredShader->setUniformBool("use_texture_kd", use_texture_kd);
+        _deferredShader->setUniformBool("use_texture_normal", _options->useNormalMap && use_texture_normal);
+
+
         // draw mesh
         glBindVertexArray(mesh.VAO);
         glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices.size()), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+
+        // always good practice to set everything back to defaults once configured.
+        glActiveTexture(GL_TEXTURE0);
 
         _deferredShader->unuse();
     }

@@ -388,9 +388,9 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
         ImGui::SameLine();
         ImGui::Checkbox("normal", &options.displayNormal);
 
-        ImGui::Text("Wire mode: ");
-        ImGui::SameLine();
-        ImGui::Checkbox("wire", &options.wire);
+        ImGui::Checkbox("Wire Mode", &options.wire);
+
+        ImGui::Checkbox("Use Normal Map", &options.useNormalMap);
 
         ImGui::Text("Renderer type: ");
         if (ImGui::RadioButton("forward", options.renderType == RenderType::FORAWRD)) {
@@ -400,17 +400,47 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
         if (ImGui::RadioButton("deferred", options.renderType == RenderType::DEFERRED)) {
             options.renderType = RenderType::DEFERRED;
         }
-        
-        ImGui::Text("Shadow: ");
-        ImGui::SameLine();
-        ImGui::Checkbox("useShadow", &options.useShadow);
+        if (options.renderType == RenderType::FORAWRD)
+        {
+            ImGui::Text("Shadow: ");
+            ImGui::SameLine();
+            ImGui::Checkbox("useShadow", &options.useShadow);
 
-        ImGui::Text("Advanced Shadow: ");
-        ImGui::Checkbox("useCSM", &options.useCSM);
-        ImGui::SameLine();
-        ImGui::Checkbox("CSMLayerVisulization", &options.CSMLayerVisulization);
-        ImGui::SameLine();
-        ImGui::Checkbox("CSMDebug", &options.CSMDebug);    
+            ImGui::Text("Advanced Shadow: ");
+            ImGui::Checkbox("useCSM", &options.useCSM);
+            ImGui::SameLine();
+            ImGui::Checkbox("CSMLayerVisulization", &options.CSMLayerVisulization);
+            ImGui::SameLine();
+            ImGui::Checkbox("CSMDebug", &options.CSMDebug);  
+        }
+        else if (options.renderType == RenderType::DEFERRED)
+        {
+            ImGui::Text("GBuffer: ");
+            ImGui::SameLine();
+            ImGui::Checkbox("Display", &options.displayGBuffer);
+
+            if (ImGui::RadioButton("position", options.gbufferDisplayType == GbufferDisplayType::POSITION)) {
+                options.gbufferDisplayType = GbufferDisplayType::POSITION;
+            }
+            ImGui::SameLine();
+
+            if (ImGui::RadioButton("fNormal", options.gbufferDisplayType == GbufferDisplayType::NORMAL)) {
+                options.gbufferDisplayType = GbufferDisplayType::NORMAL;
+            }
+            ImGui::SameLine();
+
+            if (ImGui::RadioButton("diffuse", options.gbufferDisplayType == GbufferDisplayType::DIFFUSE)) {
+                options.gbufferDisplayType = GbufferDisplayType::DIFFUSE;
+            }
+            ImGui::SameLine();
+
+            if (ImGui::RadioButton("texcoords", options.gbufferDisplayType == GbufferDisplayType::TEXCOORDS)) {
+                options.gbufferDisplayType = GbufferDisplayType::TEXCOORDS;
+            }
+            ImGui::SameLine();
+        }
+        
+  
     }
     ImGui::End();
 }

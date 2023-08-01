@@ -60,7 +60,7 @@ void PhongShader::renderFacet(const AssimpModel& model)
 
         _shader->setUniformBool("use_texture_kd", use_texture_kd);
         _shader->setUniformBool("use_texture_ks", use_texture_ks);
-        _shader->setUniformBool("use_texture_normal", use_texture_normal);
+        _shader->setUniformBool("use_texture_normal", _options->useNormalMap && use_texture_normal);
 
         _shader->setUniformBool("use_shadow", _options->useShadow);
         _shader->setUniformInt("shadowMap", 0);
@@ -261,7 +261,7 @@ void CSMShader::renderFacet(const AssimpModel& model)
 
         _shader->setUniformBool("use_texture_kd", use_texture_kd);
         _shader->setUniformBool("use_texture_ks", use_texture_ks);
-        _shader->setUniformBool("use_texture_normal", use_texture_normal);
+        _shader->setUniformBool("use_texture_normal", _options->useNormalMap && use_texture_normal);
 
         _shader->setUniformInt("shadowMap", 0);
 

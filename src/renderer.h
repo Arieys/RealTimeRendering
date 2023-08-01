@@ -62,6 +62,9 @@ private:
     //gbuffer
     std::unique_ptr<GBuffer> _gBuffer;
 
+    //uiOptions
+    std::shared_ptr<UIOptions> _options;
+
     //render type
     RenderType currentRenderType;
 
@@ -76,8 +79,8 @@ private:
     void renderGbufferToScreen();
     void renderGbuffer(const AssimpModel& model);
 
-    void forwardShading(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene, const UIOptions& options);
+    void forwardShading(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene);
 
-    void deferredShading(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene, const UIOptions& options);
+    void deferredShading(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene);
 
 };
