@@ -38,6 +38,7 @@ void Framebuffer::attachTexture(const Texture& texture, GLenum attachment, int l
 
 void Framebuffer::attachTexture2D(
     const Texture& texture, GLenum attachment, GLenum textarget, int level) {
+    GL_DEPTH_ATTACHMENT;
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, textarget, texture.getHandle(), level);
 }
 

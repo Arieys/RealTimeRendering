@@ -1,6 +1,6 @@
 #pragma once
 #include "base/glsl_program.h"
-#include "renderer_options.h"
+#include "ui_options.h"
 #include "model.h"
 #include "base/camera.h"
 #include "base/light.h"
@@ -14,6 +14,9 @@ public:
 	//plane render
 	GLuint planeVAO = 0;
 	GLuint planeVBO = 0;
+
+	std::shared_ptr<UIOptions> _options;
+
 	Shader(int width, int height, const std::string& shaderBasePath, const std::string vs_path, const std::string fs_path, const std::string gs_path = std::string(""))
 	{
 		screenWidth = width;
@@ -59,9 +62,13 @@ public:
 		_shader->setUniformVec3("viewPos", camera->transform.position);
 		_shader->unuse();
 	}
-	virtual void renderFacet(const AssimpModel& model, const RendererOptions& options) = 0;
+	virtual void setRenderOptions(const UIOptions& options)
+	{
+		_options = std::make_shared<UIOptions>(options);
+	}
+	virtual void renderFacet(const AssimpModel& model) = 0;
 	virtual void renderBackground() = 0;
-	virtual void genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models, const RendererOptions& options){} //default gen no shadow map
+	virtual void genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models){} //default gen no shadow map
 	virtual void deleteBuffer(){}
 };
 
@@ -73,7 +80,7 @@ public:
 	{
 		initShadowShader(shaderBasePath);
 	}
-	virtual void renderFacet(const AssimpModel& model, const RendererOptions& options);
+	virtual void renderFacet(const AssimpModel& model);
 	virtual void renderBackground();
 	~PhongShader()
 	{
@@ -98,12 +105,12 @@ public:
 	GLuint depthMapFBO = 0;
 	GLuint depthMap = 0;
 	glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
-	void genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models, const RendererOptions& options);
+	void genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models);
 	virtual void deleteBuffer()
 	{
 		//delete shadow related frameBuffer
-		if (depthMap != 0) glDeleteTextures(1, &depthMap);
-		if (depthMapFBO != 0) glDeleteFramebuffers(1, &depthMapFBO);
+		glDeleteTextures(1, &depthMap);
+		glDeleteFramebuffers(1, &depthMapFBO);
 	}
 };
 
@@ -123,7 +130,7 @@ public:
 	//for cascade shadow map
 	std::vector<float> shadowCascadeLevels;
 	std::vector<glm::mat4> lightspace_matrics;
-	void genDepthMap (const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models, const RendererOptions& options);
+	void genDepthMap (const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models);
 	std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);
 	glm::mat4 getLightSpaceMatrix(const float nearPlane, const float farPlane, std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
 	std::vector<glm::mat4> getLightSpaceMatrices(std::unique_ptr<PerspectiveCamera>& _camera, const DirectionalLight& l);
@@ -160,13 +167,13 @@ public:
 		initShadowShader(shaderBasePath);
 		initOtherShader(shaderBasePath);
 	}
-	virtual void renderFacet(const AssimpModel& model, const RendererOptions& options);
+	virtual void renderFacet(const AssimpModel& model);
 	virtual void renderBackground();
 	virtual void deleteBuffer()
 	{
 		//delete shadow related frameBuffer
-		if (depthMap != 0) glDeleteTextures(1, &depthMap);
-		if (depthMapFBO != 0) glDeleteFramebuffers(1, &depthMapFBO);
+		glDeleteTextures(1, &depthMap);
+		glDeleteFramebuffers(1, &depthMapFBO);
 	}
 
 	~CSMShader()

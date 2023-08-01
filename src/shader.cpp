@@ -1,6 +1,6 @@
 #include "shader.h"
 
-void PhongShader::renderFacet(const AssimpModel& model, const RendererOptions& options)
+void PhongShader::renderFacet(const AssimpModel& model)
 {
     for (const auto& mesh : model.meshes) {
         // bind appropriate textures
@@ -62,6 +62,7 @@ void PhongShader::renderFacet(const AssimpModel& model, const RendererOptions& o
         _shader->setUniformBool("use_texture_ks", use_texture_ks);
         _shader->setUniformBool("use_texture_normal", use_texture_normal);
 
+        _shader->setUniformBool("use_shadow", _options->useShadow);
         _shader->setUniformInt("shadowMap", 0);
 
         // draw mesh
@@ -97,6 +98,7 @@ void PhongShader::renderBackground()
     _shader->setUniformBool("use_texture_ks", false);
     _shader->setUniformBool("use_texture_normal", false);
 
+    _shader->setUniformBool("use_shadow", _options->useShadow);
     _shader->setUniformInt("shadowMap", 0);
     glBindVertexArray(planeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -106,7 +108,7 @@ void PhongShader::renderBackground()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void PhongShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models, const RendererOptions& options)
+void PhongShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models)
 {
     glEnable(GL_DEPTH_TEST);
     glCullFace(GL_FRONT);
@@ -163,7 +165,7 @@ void PhongShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspec
 
     //render scene from light perspective
     //render models
-    if (options.showFacet)
+    if (_options->displayFacet)
     {
         for (const auto& model : models)
         {
@@ -194,7 +196,7 @@ void PhongShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspec
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void CSMShader::renderFacet(const AssimpModel& model, const RendererOptions& options)
+void CSMShader::renderFacet(const AssimpModel& model)
 {
     for (const auto& mesh : model.meshes) {
         // bind appropriate textures
@@ -209,7 +211,7 @@ void CSMShader::renderFacet(const AssimpModel& model, const RendererOptions& opt
         _shader->setUniformVec3("material.diffuse", material->kd);
         _shader->setUniformVec3("material.specular", material->ks);
         _shader->setUniformFloat("material.shininess", material->ns);
-        _shader->setUniformBool("LayerVisulization", options.CSMLayerVis);
+        _shader->setUniformBool("LayerVisulization", _options->CSMLayerVisulization);
         _shader->setUniformMat4("model", model.transform.getLocalMatrix());
 
         for (int i = 0; i < lightspace_matrics.size(); i++) {
@@ -312,7 +314,7 @@ void CSMShader::renderBackground()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void CSMShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models, const RendererOptions& options)
+void CSMShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<PerspectiveCamera>& _camera, const std::vector<AssimpModel>& models)
 {
     lightspace_matrics = getLightSpaceMatrices(_camera, l);
 
@@ -366,7 +368,7 @@ void CSMShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspecti
 
         //render scene from light perspective
         //render models
-        if (options.showFacet)
+        if (_options->displayFacet)
         {
             for (const auto& model : models)
             {

@@ -21,6 +21,8 @@ uniform bool use_texture_ks;
 uniform bool use_texture_normal;
 uniform bool use_texture_height;
 
+uniform bool use_shadow;
+
 struct Material {
     vec3 ambient;
     vec3 diffuse;
@@ -48,6 +50,7 @@ vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 fragPos, vec
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 lightDir, vec3 normal)
 {
+    if(!use_shadow) return 0.0; 
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     // transform to [0,1] range

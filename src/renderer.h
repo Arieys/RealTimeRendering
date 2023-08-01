@@ -18,8 +18,9 @@
 #include "scene.h"
 #include "base/application.h"
 
-#include "renderer_options.h"
+#include "ui_options.h"
 #include "shader.h"
+#include "gbuffer.h"
 
 class Renderer
 {
@@ -31,7 +32,7 @@ public:
         screenHeight = height, screenWidth = width;
     }
 
-    void render(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene, const RendererOptions& options);
+    void render(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene, const UIOptions& options);
 
     ~Renderer();
 
@@ -43,9 +44,12 @@ private:
     std::unique_ptr<GLSLProgram> _flatShader;
     std::unique_ptr<GLSLProgram> _normalShader;
 
-    //main shader
+    //main forward shader
     std::shared_ptr<PhongShader> _phongShader;  
     std::shared_ptr<CSMShader> _csmShader;
+
+    //deferred shader
+    std::unique_ptr<GLSLProgram> _deferredShader;
 
     //screen info
     int screenWidth;
@@ -55,6 +59,12 @@ private:
     GLuint planeVAO;
     GLuint planeVBO;
 
+    //gbuffer
+    std::unique_ptr<GBuffer> _gBuffer;
+
+    //render type
+    RenderType currentRenderType;
+
     //base functions
     void initShaders(const std::string& shaderBasePath);
     void initBackground();
@@ -62,5 +72,12 @@ private:
     void updateDirectionalLight(const DirectionalLight& light);
     void renderLight(const DirectionalLight& pointlight);
     void renderNormal(const AssimpModel& model);
+
+    void renderGbufferToScreen();
+    void renderGbuffer(const AssimpModel& model);
+
+    void forwardShading(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene, const UIOptions& options);
+
+    void deferredShading(unique_ptr<PerspectiveCamera>& _camera, const Scene& scene, const UIOptions& options);
 
 };

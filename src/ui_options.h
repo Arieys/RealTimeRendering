@@ -1,5 +1,10 @@
 #pragma once
 
+enum RenderType {
+    FORAWRD,
+    DEFERRED
+};
+
 struct UIOptions
 {
     bool displayFacet = true;
@@ -9,4 +14,7 @@ struct UIOptions
     bool CSMDebug = false;
     bool CSMLayerVisulization = false;
     bool displayNormal = false;
+
+    RenderType renderType = FORAWRD;
+    bool displayGBuffer = false;
 };

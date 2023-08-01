@@ -68,18 +68,8 @@ void Viewer::renderFrame()
     showFpsInWindowTitle();
     clearScreen();
 
-    RendererOptions options{
-        _uiOptions->displayFacet,
-        _uiOptions->wire,
-        _uiOptions->useShadow,
-        _uiOptions->useCSM,
-        _uiOptions->CSMDebug,
-        _uiOptions->CSMLayerVisulization,
-        _uiOptions->displayNormal
-    };
-
     _renderer->setScreenSize(this->_windowHeight, this->_windowWidth);
-    _renderer->render(_camera, *_scene, options);
+    _renderer->render(_camera, *_scene, *_uiOptions);
 
     _ui->render(_camera, *_uiOptions, *_scene);
 }

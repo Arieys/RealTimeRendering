@@ -1,2 +1,2 @@
 #pragma once
-constexpr const char* ROOT_PATH = "D:/yanshuai/RealTimeRendering";
+constexpr const char* ROOT_PATH = "C:/RealTimeRendering";

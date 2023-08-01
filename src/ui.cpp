@@ -391,6 +391,15 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
         ImGui::Text("Wire mode: ");
         ImGui::SameLine();
         ImGui::Checkbox("wire", &options.wire);
+
+        ImGui::Text("Renderer type: ");
+        if (ImGui::RadioButton("forward", options.renderType == RenderType::FORAWRD)) {
+            options.renderType = RenderType::FORAWRD;
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("deferred", options.renderType == RenderType::DEFERRED)) {
+            options.renderType = RenderType::DEFERRED;
+        }
         
         ImGui::Text("Shadow: ");
         ImGui::SameLine();

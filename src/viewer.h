@@ -13,7 +13,6 @@
 #include "scene.h"
 #include "ui.h"
 #include "ui_options.h"
-#include "renderer_options.h"
 
 
 class Viewer : public Application
