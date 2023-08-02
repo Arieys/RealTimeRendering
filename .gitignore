@@ -3,3 +3,4 @@
 **/install
 **/.vs
 external/assimp-build/
+src/config.h
