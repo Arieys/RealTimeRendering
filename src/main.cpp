@@ -16,6 +16,7 @@ Options getOptions(int argc, char* argv[]) {
     options.assetRootDir = ROOT_PATH + "/media/"s;
     options.argc = argc;
     options.argv = argv;
+    options.glDbg = true;
     return options;
 }
 

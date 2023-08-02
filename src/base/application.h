@@ -21,6 +21,7 @@ struct Options {
     bool windowResizable;
     bool vSync;
     bool msaa;
+    bool glDbg;
     std::pair<int, int> glVersion;
     glm::vec4 backgroundColor;
     int argc;

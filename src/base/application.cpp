@@ -33,6 +33,11 @@ Application::Application(const Options& options)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, options.windowResizable);
 
+    if (options.glDbg)
+    {
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    }
+
     if (options.msaa) {
         glfwWindowHint(GLFW_SAMPLES, 4);
     }
@@ -77,6 +82,14 @@ Application::Application(const Options& options)
     std::cout << "+ renderer:   " << glGetString(GL_RENDERER) << '\n';
     std::cout << "+ glsl:       " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
     std::cout << std::endl;
+
+    if (options.glDbg)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(OpenGLDebugCallback, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
 
     // framebuffer and viewport
     glfwGetFramebufferSize(_window, &_windowWidth, &_windowHeight);
