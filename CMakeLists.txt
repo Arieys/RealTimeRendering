@@ -51,4 +51,7 @@ set_target_properties(stb PROPERTIES FOLDER "lib")
 add_subdirectory(./external/assimp)
 set_target_properties(assimp PROPERTIES FOLDER "lib")
 
+add_subdirectory(./external/spdlog)
+set_target_properties(spdlog PROPERTIES FOLDER "lib")
+
 add_subdirectory(src)

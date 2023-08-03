@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 
+#include "../spdlogMgr.h"
+
 #if defined(__EMSCRIPTEN__)
     #include <webgl/webgl2.h>
 #elif defined(USE_GLES)
@@ -48,6 +50,8 @@ inline void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum se
     const char* type_str;
     const char* severity_str;
 
+    auto console_logger = spdlogManagement::getConsoleLogHandle();
+
     switch (source)
     {
     case GL_DEBUG_SOURCE_API:
@@ -70,6 +74,25 @@ inline void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum se
         break;
     default:
         source_str = "?";
+        break;
+    }
+
+    switch (severity)
+    {
+    case GL_DEBUG_SEVERITY_HIGH:
+        severity_str = "SEVERITY_HIGH";
+        break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+        severity_str = "SEVERITY_MEDIUM";
+        break;
+    case GL_DEBUG_SEVERITY_LOW:
+        severity_str = "SEVERITY_LOW";
+        break;
+    case GL_DEBUG_SEVERITY_NOTIFICATION:
+        severity_str = "SEVERITY_NOTIFICATION";
+        break;
+    default:
+        severity_str = "?";
         break;
     }
 
@@ -101,35 +124,35 @@ inline void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum se
         break;
     }
 
-    switch (severity)
-    {
-    case GL_DEBUG_SEVERITY_HIGH:
-        severity_str = "SEVERITY_HIGH";
-        break;
-    case GL_DEBUG_SEVERITY_MEDIUM:
-        severity_str = "SEVERITY_MEDIUM";
-        break;
-    case GL_DEBUG_SEVERITY_LOW:
-        severity_str = "SEVERITY_LOW";
-        break;
-    case GL_DEBUG_SEVERITY_NOTIFICATION:
-        severity_str = "SEVERITY_NOTIFICATION";
-        break;
-    default:
-        severity_str = "?";
-        break;
-    }
+    //example of using file_log
+    ////console2 的module 名字不可以和以前的重复，创建的日志名字为 basic_log
+    //auto console_file = spdlog::basic_logger_mt("basic_logger", "./basic_log");
+    //console_file->info("Some log message");
 
-    //debug mes filter
+    ////通过module名字获取到对应的log指针
+    //spdlog::get("console2")->info("get console by name");
 
-    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+    //设置日志等级
+    spdlog::set_level(spdlog::level::info);//Set global log level to info
+
+    std::string log =  "[" + std::string(source_str) + "][" + type_str + "][" + std::to_string(id) + "][" + severity_str + "] " + msg;
+    
+    console_logger->set_level(spdlog::level::warn);
+
+    if (type == GL_DEBUG_TYPE_ERROR)
     {
-        if (!debugCtr.showNotificationInfo) return;
+        console_logger->error(log);
     }
     else
     {
-        if (!debugCtr.showErrorInfo) return;
+        if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+        {
+            console_logger->warn(log);
+        }
+        else
+        {
+            console_logger->info(log);
+        }
     }
-
-    std::cerr << "[" << source_str << "][" << type_str << "][" << id << "][" << severity_str << "] " << msg << std::endl;
+    
 }
