@@ -26,19 +26,19 @@ Application::Application(const Options& options)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 #else
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, options.glVersion.first);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, options.glVersion.second);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, options.glOptions.glVersion.first);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, options.glOptions.glVersion.second);
 #endif
 
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, options.windowResizable);
 
-    if (options.glDbg)
+    if (options.glOptions.glErrDbg || options.glOptions.glInfoDbg)
     {
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     }
 
-    if (options.msaa) {
+    if (options.glOptions.msaa) {
         glfwWindowHint(GLFW_SAMPLES, 4);
     }
 
@@ -83,7 +83,7 @@ Application::Application(const Options& options)
     std::cout << "+ glsl:       " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
     std::cout << std::endl;
 
-    if (options.glDbg)
+    if (options.glOptions.glInfoDbg || options.glOptions.glErrDbg)
     {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -91,12 +91,15 @@ Application::Application(const Options& options)
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
+    debugCtr.showErrorInfo = options.glOptions.glErrDbg;
+    debugCtr.showNotificationInfo = options.glOptions.glInfoDbg;
+
     // framebuffer and viewport
     glfwGetFramebufferSize(_window, &_windowWidth, &_windowHeight);
     glViewport(0, 0, _windowWidth, _windowHeight);
 
 #ifndef USE_GLES
-    if (options.msaa) {
+    if (options.glOptions.msaa) {
         glEnable(GL_MULTISAMPLE);
     }
 #endif

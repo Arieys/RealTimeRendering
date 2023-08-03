@@ -363,7 +363,6 @@ void CSMShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspecti
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, i);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         //render scene from light perspective
@@ -396,7 +395,6 @@ void CSMShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspecti
 
         //reset view port
         glViewport(0, 0, screenWidth, screenHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
 }

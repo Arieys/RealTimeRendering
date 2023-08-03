@@ -13,6 +13,13 @@
 #include "gl_utility.h"
 #include "input.h"
 
+struct GLOptions {
+    bool msaa;
+    bool glErrDbg;
+    bool glInfoDbg;
+    std::pair<int, int> glVersion;
+};
+
 struct Options {
     std::string assetRootDir;
     std::string windowTitle;
@@ -20,9 +27,7 @@ struct Options {
     int windowHeight;
     bool windowResizable;
     bool vSync;
-    bool msaa;
-    bool glDbg;
-    std::pair<int, int> glVersion;
+    GLOptions glOptions;
     glm::vec4 backgroundColor;
     int argc;
     char** argv;

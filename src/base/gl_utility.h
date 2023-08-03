@@ -11,6 +11,12 @@
     #include <glad/gl.h>
 #endif
 
+static struct debugInfoControl
+{
+    bool showErrorInfo;
+    bool showNotificationInfo;
+} debugCtr;
+
 inline GLenum implCheckGLErrors(const char* file, int line) {
     GLenum errorCode;
     while ((errorCode = glGetError()) != GL_NO_ERROR) {
@@ -113,5 +119,17 @@ inline void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum se
         severity_str = "?";
         break;
     }
+
+    //debug mes filter
+
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+    {
+        if (!debugCtr.showNotificationInfo) return;
+    }
+    else
+    {
+        if (!debugCtr.showErrorInfo) return;
+    }
+
     std::cerr << "[" << source_str << "][" << type_str << "][" << id << "][" << severity_str << "] " << msg << std::endl;
 }

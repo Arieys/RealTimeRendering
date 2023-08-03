@@ -10,13 +10,14 @@ Options getOptions(int argc, char* argv[]) {
     options.windowHeight = 1080;
     options.windowResizable = false;
     options.vSync = true;
-    options.msaa = true;
-    options.glVersion = {4, 6};
+    options.glOptions.msaa = true;
+    options.glOptions.glVersion = {4, 6};
     options.backgroundColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     options.assetRootDir = ROOT_PATH + "/media/"s;
     options.argc = argc;
     options.argv = argv;
-    options.glDbg = true;
+    options.glOptions.glInfoDbg = false;
+    options.glOptions.glErrDbg = true;
     return options;
 }
 
