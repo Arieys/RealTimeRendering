@@ -3,7 +3,8 @@ in VS_OUT {
     vec3 FragPos;
     vec3 Normal;
     vec2 TexCoords;
-} vs_in;
+    mat3 TBN;
+} fs_in;
 
 out vec4 FragColor;
 
@@ -29,11 +30,15 @@ uniform Material material;
 
 void main() 
 { 
-    WorldPosOut = vs_in.FragPos; 
-    if(use_texture_kd) DiffuseOut = texture(texture_diffuse1, vs_in.TexCoords).xyz; 
+    WorldPosOut = fs_in.FragPos; 
+    if(use_texture_kd) DiffuseOut = texture(texture_diffuse1, fs_in.TexCoords).xyz; 
     else DiffuseOut = material.diffuse;
-    if(use_texture_normal) NormalOut = texture(texture_normal1, vs_in.TexCoords).xyz; 
-    else NormalOut = normalize(vs_in.Normal); 
-    TexCoordOut = vec3(vs_in.TexCoords, 0.0); 
+    if(use_texture_normal) {
+        vec3 norm = texture(texture_normal1, fs_in.TexCoords).xyz;
+        norm = normalize(norm * 2.0 - 1.0);   
+        NormalOut = normalize(fs_in.TBN * norm);
+    }
+    else NormalOut = normalize(fs_in.Normal); 
+    TexCoordOut = vec3(fs_in.TexCoords, 0.0); 
 }
 

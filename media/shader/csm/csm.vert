@@ -19,7 +19,7 @@ uniform mat4 projection;
 void main()
 {    
     //calculate TBN matrix
-    mat3 normalMatrix = transpose(inverse(mat3(model))); // correct normal transform as learned in previous tutorials here
+    mat3 normalMatrix = transpose(inverse(mat3(model)));
     vec3 N = normalize(normalMatrix * aNormal);
     vec3 T = normalize(normalMatrix * tangent);
     vec3 B = normalize(normalMatrix * bitangent);
