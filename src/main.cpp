@@ -17,7 +17,7 @@ Options getOptions(int argc, char* argv[]) {
     options.argc = argc;
     options.argv = argv;
     options.glOptions.glInfoDbg = false;
-    options.glOptions.glErrDbg = true;
+    options.glOptions.glWarnDbg = true;
     return options;
 }
 

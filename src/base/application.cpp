@@ -33,7 +33,7 @@ Application::Application(const Options& options)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, options.windowResizable);
 
-    if (options.glOptions.glErrDbg || options.glOptions.glInfoDbg)
+    if (options.glOptions.glWarnDbg || options.glOptions.glInfoDbg)
     {
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     }
@@ -83,7 +83,7 @@ Application::Application(const Options& options)
     std::cout << "+ glsl:       " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
     std::cout << std::endl;
 
-    if (options.glOptions.glInfoDbg || options.glOptions.glErrDbg)
+    if (options.glOptions.glInfoDbg || options.glOptions.glWarnDbg)
     {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -91,7 +91,7 @@ Application::Application(const Options& options)
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
-    debugCtr.showErrorInfo = options.glOptions.glErrDbg;
+    debugCtr.showWarningInfo = options.glOptions.glWarnDbg;
     debugCtr.showNotificationInfo = options.glOptions.glInfoDbg;
 
     // framebuffer and viewport

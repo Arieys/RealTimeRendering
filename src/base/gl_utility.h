@@ -15,7 +15,7 @@
 
 static struct debugInfoControl
 {
-    bool showErrorInfo;
+    bool showWarningInfo;
     bool showNotificationInfo;
 } debugCtr;
 
@@ -124,34 +124,34 @@ inline void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum se
         break;
     }
 
-    //example of using file_log
-    ////console2 的module 名字不可以和以前的重复，创建的日志名字为 basic_log
-    //auto console_file = spdlog::basic_logger_mt("basic_logger", "./basic_log");
-    //console_file->info("Some log message");
+    std::string log = "[" + std::string(source_str) + "][" + type_str + "] " + msg;
 
-    ////通过module名字获取到对应的log指针
-    //spdlog::get("console2")->info("get console by name");
-
-    //设置日志等级
-    spdlog::set_level(spdlog::level::info);//Set global log level to info
-
-    std::string log =  "[" + std::string(source_str) + "][" + type_str + "][" + std::to_string(id) + "][" + severity_str + "] " + msg;
+    if(debugCtr.showWarningInfo && debugCtr.showNotificationInfo) console_logger->set_level(spdlog::level::info);
+    else if(debugCtr.showWarningInfo) console_logger->set_level(spdlog::level::warn);
+    else console_logger->set_level(spdlog::level::info);
     
-    console_logger->set_level(spdlog::level::warn);
 
     if (type == GL_DEBUG_TYPE_ERROR)
     {
+        log = _COLOR_RED + log + _COLOR_DEFAULT;
         console_logger->error(log);
     }
     else
     {
         if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
         {
-            console_logger->warn(log);
+            if (debugCtr.showWarningInfo) {
+                log = _COLOR_YELLOW + log + _COLOR_DEFAULT;
+                console_logger->warn(log);
+            }
         }
         else
         {
-            console_logger->info(log);
+            if (debugCtr.showNotificationInfo) {
+                log = _COLOR_GREEN + log + _COLOR_DEFAULT;
+                console_logger->info(log);
+            }
+
         }
     }
     

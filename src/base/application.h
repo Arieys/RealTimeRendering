@@ -15,7 +15,7 @@
 
 struct GLOptions {
     bool msaa;
-    bool glErrDbg;
+    bool glWarnDbg;
     bool glInfoDbg;
     std::pair<int, int> glVersion;
 };
