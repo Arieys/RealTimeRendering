@@ -185,7 +185,7 @@ vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 fragPos, vec
     }
     if(use_texture_ks)
     {
-        specular = light.specular * spec * texture(texture_specular1,fs_in.TexCoords).rgb;
+        specular = light.specular * spec * texture(texture_specular1,fs_in.TexCoords).r;
     }
     if(LayerVisulization)
     {

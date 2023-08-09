@@ -25,7 +25,7 @@ public:
 		const std::string FragShaderRelPath = shaderBasePath + fs_path;
 		const std::string GeomShaderRelPath = shaderBasePath + gs_path;
 
-		_shader.reset(new GLSLProgram);
+		_shader = std::make_unique<GLSLProgram>();
 
 		_shader->attachVertexShaderFromFile(VertShaderRelPath);
 		_shader->attachFragmentShaderFromFile(FragShaderRelPath);
@@ -91,7 +91,7 @@ public:
 		const std::string shadowVertShaderRelPath = shaderBasePath + "/shadow/shadowvShader.vert";
 		const std::string shadowFragShaderRelPath = shaderBasePath + "/shadow/shadowfShader.frag";
 
-		_shadowShader.reset(new GLSLProgram);
+		_shadowShader = std::make_unique<GLSLProgram>();
 
 		_shadowShader->attachVertexShaderFromFile(shadowVertShaderRelPath);
 		_shadowShader->attachFragmentShaderFromFile(shadowFragShaderRelPath);
@@ -141,7 +141,7 @@ public:
 		const std::string shadowVertShaderRelPath = shaderBasePath + "/shadow/shadowvShader.vert";
 		const std::string shadowFragShaderRelPath = shaderBasePath + "/shadow/shadowfShader.frag";
 
-		_shadowShader.reset(new GLSLProgram);
+		_shadowShader = std::make_unique<GLSLProgram>();
 
 		_shadowShader->attachVertexShaderFromFile(shadowVertShaderRelPath);
 		_shadowShader->attachFragmentShaderFromFile(shadowFragShaderRelPath);
@@ -153,7 +153,7 @@ public:
 		const std::string debugVertShaderRelPath = shaderBasePath + "/csm/quadDebug.vert";
 		const std::string debugFragShaderRelPath = shaderBasePath + "/csm/quadDebug.frag";
 
-		_debugShader.reset(new GLSLProgram);
+		_debugShader = std::make_unique<GLSLProgram>();
 
 		_debugShader->attachVertexShaderFromFile(debugVertShaderRelPath);
 		_debugShader->attachFragmentShaderFromFile(debugFragShaderRelPath);

@@ -29,11 +29,14 @@ void Renderer::render(unique_ptr<PerspectiveCamera>& camera, const Scene& scene,
 void Renderer::forwardShading(unique_ptr<PerspectiveCamera>& camera, const Scene& scene)
 {
     //set current main pipeline shader
-    if (_options->useShadow) {
-        if (_options->useCSM) _currentShader = _csmShader;
-        else _currentShader = _phongShader;
+    if (_options->fShaderType == ForwardShaderType::Phong)
+    {
+        _currentShader = _phongShader;
     }
-    else _currentShader = _phongShader;
+    else if (_options->fShaderType == ForwardShaderType::CSM)
+    {
+        _currentShader = _csmShader;
+    }
 
     //update ui options
     _currentShader->setRenderOptions(*_options);
@@ -69,11 +72,9 @@ void Renderer::forwardShading(unique_ptr<PerspectiveCamera>& camera, const Scene
 
         if (_options->displayFacet)
         {
-            if (_options->useShadow && _options->useCSM && _options->CSMDebug) {
-                std::dynamic_pointer_cast<CSMShader>(_currentShader)->renderDubugInfo();
-            }
-            else _currentShader->renderFacet(model);
+            _currentShader->renderFacet(model);
         }
+        else break;
 
         if (_options->displayNormal)
         {
@@ -135,7 +136,7 @@ void Renderer::deferredShading(unique_ptr<PerspectiveCamera>& camera, const Scen
     //bind current drawing framebuffer to default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    if (_options->displayGBuffer)
+    if (_options->dShaderType == DeferredShaderType::GBufferDisplay)
     {
         renderGbufferToScreen();
     }
@@ -163,43 +164,34 @@ void Renderer::updateDirectionalLight(const DirectionalLight&light)
 
 
 void Renderer::initShaders(const std::string& shaderBasePath)
-{
-    const std::string flatVertShaderRelPath = shaderBasePath + "/flat/flat.vert";
-    const std::string flatFragShaderRelPath = shaderBasePath + "/flat/flat.frag";
-
+{    
     const std::string phongVertShaderRelPath = "/phong/phong.vert";
     const std::string phongFragShaderRelPath = "/phong/phong.frag";
 
     const std::string csmVertShaderRelPath = "/csm/csm.vert";
     const std::string csmFragShaderRelPath = "/csm/csm.frag";
 
-    const std::string normalVertShaderRelPath = shaderBasePath + "/normal/normal_visualization.vert";
-    const std::string normalFragShaderRelPath = shaderBasePath + "/normal/normal_visualization.frag";
-    const std::string normalGeomShaderRelPath = shaderBasePath + "/normal/normal_visualization.geom";
-
-    const std::string gBufferGenVertShaderRelPath = shaderBasePath + "/gbufferGen/gbufferGen.vert";
-    const std::string gBufferGenFragShaderRelPath = shaderBasePath + "/gbufferGen/gbufferGen.frag";
-
-    _flatShader.reset(new GLSLProgram);
-    _normalShader.reset(new GLSLProgram);
-    _deferredShader.reset(new GLSLProgram);
-
     _phongShader.reset(new PhongShader(screenWidth, screenHeight, shaderBasePath,phongVertShaderRelPath, phongFragShaderRelPath));
     _csmShader.reset(new CSMShader(screenWidth, screenHeight, shaderBasePath,csmVertShaderRelPath, csmFragShaderRelPath));
 
-    _flatShader->attachVertexShaderFromFile(flatVertShaderRelPath);
-    _flatShader->attachFragmentShaderFromFile(flatFragShaderRelPath);
-    _flatShader->link();
+    initPerShader(_flatShader, shaderBasePath, "flat", false);
+    initPerShader(_normalShader, shaderBasePath, "normal", true);
+    initPerShader(_deferredShader, shaderBasePath, "gbufferGen", false);
+    //initPerShader(_deferredLightShader, shaderBasePath, "deferred", false);
+}
 
-    _normalShader->attachVertexShaderFromFile(normalVertShaderRelPath);
-    _normalShader->attachFragmentShaderFromFile(normalFragShaderRelPath);
-    _normalShader->attachGeometryShaderFromFile(normalGeomShaderRelPath);
-    _normalShader->link();
+void Renderer::initPerShader(std::shared_ptr<GLSLProgram> &shader,const std::string shader_path, const std::string shader_name, bool use_geometry)
+{
+    shader = std::make_shared<GLSLProgram>();
 
-    _deferredShader->attachVertexShaderFromFile(gBufferGenVertShaderRelPath);
-    _deferredShader->attachFragmentShaderFromFile(gBufferGenFragShaderRelPath);
-    _deferredShader->link();
-    
+    const std::string VertShaderRelPath = shader_path + "/" + shader_name + "/" + shader_name + ".vert";
+    const std::string FragShaderRelPath = shader_path + "/" + shader_name + "/" + shader_name + ".frag";
+    const std::string GeomShaderRelPath = shader_path + "/" + shader_name + "/" + shader_name + ".geom";
+
+    shader->attachVertexShaderFromFile(VertShaderRelPath);
+    shader->attachFragmentShaderFromFile(FragShaderRelPath);
+    if(use_geometry) shader->attachGeometryShaderFromFile(GeomShaderRelPath);
+    shader->link();
 }
 
 void Renderer::initBackground()
@@ -362,6 +354,7 @@ void Renderer::renderGbuffer(const AssimpModel& model)
         _deferredShader->setUniformVec3("material.diffuse", material->kd);
 
         bool use_texture_kd = false;
+        bool use_texture_ks = false;
         bool use_texture_normal = false;
 
         for (unsigned int i = 0; i < mesh.textures.size(); i++)
@@ -384,12 +377,19 @@ void Renderer::renderGbuffer(const AssimpModel& model)
                 // now set the sampler to the correct texture unit
                 _deferredShader->setUniformInt((name + number).c_str(), i + 1);
             }
+            else if (name == "texture_specular")
+            {
+                number = std::to_string(specularNr++); // transfer unsigned int to string
+                use_texture_ks = true;
+                _deferredShader->setUniformInt((name + number).c_str(), i + 1);
+            }
 
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, mesh.textures[i].id);
         }
 
         _deferredShader->setUniformBool("use_texture_kd", use_texture_kd);
+        _deferredShader->setUniformBool("use_texture_ks", use_texture_ks);
         _deferredShader->setUniformBool("use_texture_normal", _options->useNormalMap && use_texture_normal);
 
 

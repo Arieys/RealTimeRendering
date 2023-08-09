@@ -20,11 +20,11 @@ void main()
 { 
     gl_Position = projection * view * model * vec4(Position, 1.0);
     vs_out.TexCoords = TexCoord; 
-    vs_out.Normal = (model * vec4(Normal, 0.0)).xyz; 
+    mat3 normalMatrix = transpose(inverse(mat3(model)));
+    vs_out.Normal = normalMatrix * Normal; 
     vs_out.FragPos = (model * vec4(Position, 1.0)).xyz;
 
     //calculate TBN matrix
-    mat3 normalMatrix = transpose(inverse(mat3(model)));
     vec3 N = normalize(normalMatrix * Normal);
     vec3 T = normalize(normalMatrix * tangent);
     vec3 B = normalize(normalMatrix * bitangent);

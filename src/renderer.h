@@ -41,15 +41,16 @@ private:
     std::shared_ptr<Shader> _currentShader;
 
     //functional shader
-    std::unique_ptr<GLSLProgram> _flatShader;
-    std::unique_ptr<GLSLProgram> _normalShader;
+    std::shared_ptr<GLSLProgram> _flatShader;
+    std::shared_ptr<GLSLProgram> _normalShader;
 
     //main forward shader
     std::shared_ptr<PhongShader> _phongShader;  
     std::shared_ptr<CSMShader> _csmShader;
 
     //deferred shader
-    std::unique_ptr<GLSLProgram> _deferredShader;
+    std::shared_ptr<GLSLProgram> _deferredShader;
+    std::shared_ptr<GLSLProgram> _deferredLightShader;
 
     //screen info
     int screenWidth;
@@ -70,6 +71,7 @@ private:
 
     //base functions
     void initShaders(const std::string& shaderBasePath);
+    void initPerShader(std::shared_ptr<GLSLProgram> &shader, const std::string shader_path, const std::string shader_name, bool use_geometry);
     void initBackground();
     void updateCamera(unique_ptr<PerspectiveCamera>& camera);
     void updateDirectionalLight(const DirectionalLight& light);

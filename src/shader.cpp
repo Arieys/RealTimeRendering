@@ -63,7 +63,7 @@ void PhongShader::renderFacet(const AssimpModel& model)
         _shader->setUniformBool("use_texture_normal", _options->useNormalMap && use_texture_normal);
 
         _shader->setUniformBool("use_shadow", _options->useShadow);
-        _shader->setUniformInt("shadowMap", 0);
+        if(_options->useShadow) _shader->setUniformInt("shadowMap", 0);
 
         // draw mesh
         glBindVertexArray(mesh.VAO);
@@ -198,6 +198,12 @@ void PhongShader::genDepthMap(const DirectionalLight& l, std::unique_ptr<Perspec
 
 void CSMShader::renderFacet(const AssimpModel& model)
 {
+    if (_options->useShadow && _options->CSMDebug)
+    {
+        this->renderDubugInfo();
+        return;
+    }
+
     for (const auto& mesh : model.meshes) {
         // bind appropriate textures
         unsigned int diffuseNr = 1;
