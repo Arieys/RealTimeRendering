@@ -376,23 +376,32 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
 {
     if (init_flag)
     {
-        ImGui::SetNextWindowPos(ImVec2(IG_LM_X, IG_LM_Y));
-        ImGui::SetNextWindowSize(ImVec2(IG_LM_W, IG_LM_H));
+        ImGui::SetNextWindowPos(ImVec2(IG_RT_X, IG_RT_Y));
+        ImGui::SetNextWindowSize(ImVec2(IG_RT_W, IG_RT_H));
     }
 
     if (ImGui::Begin("Rendering Option Manager"))
     {
         ImGui::Text("Display: ");
         ImGui::SameLine();
+        ImGui::SetCursorPosX(IG_RT_W - 400);
         ImGui::Checkbox("facet", &options.displayFacet);
         ImGui::SameLine();
         ImGui::Checkbox("normal", &options.displayNormal);
 
-        ImGui::Checkbox("Wire Mode", &options.wire);
+        ImGui::Text("Wire Mode: ");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(IG_RT_W - 400);
+        ImGui::Checkbox("On", &options.wire);
 
-        ImGui::Checkbox("Use Normal Map", &options.useNormalMap);
+        ImGui::Text("Normal Map: ");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(IG_RT_W - 400);
+        ImGui::Checkbox("Use", &options.useNormalMap);
 
         ImGui::Text("Renderer type: ");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(IG_RT_W - 400);
         if (ImGui::RadioButton("forward", options.renderType == RenderType::FORAWRD)) {
             options.renderType = RenderType::FORAWRD;
         }
@@ -402,45 +411,66 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
         }
         if (options.renderType == RenderType::FORAWRD)
         {
+            ImGui::Text("Shader type: ");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(IG_RT_W - 400);
+            if (ImGui::RadioButton("Phong", options.fShaderType == ForwardShaderType::Phong)) {
+                options.fShaderType = ForwardShaderType::Phong;
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("CSM", options.fShaderType == ForwardShaderType::CSM)) {
+                options.fShaderType = ForwardShaderType::CSM;
+            }
             ImGui::Text("Shadow: ");
             ImGui::SameLine();
-            ImGui::Checkbox("useShadow", &options.useShadow);
+            ImGui::SetCursorPosX(IG_RT_W - 400);
+            ImGui::Checkbox("UseShadow", &options.useShadow);
 
-            ImGui::Text("Advanced Shadow: ");
-            ImGui::Checkbox("useCSM", &options.useCSM);
-            ImGui::SameLine();
-            ImGui::Checkbox("CSMLayerVisulization", &options.CSMLayerVisulization);
-            ImGui::SameLine();
-            ImGui::Checkbox("CSMDebug", &options.CSMDebug);  
+            if (options.fShaderType == ForwardShaderType::CSM)
+            {
+                ImGui::Text("Advanced Shadow Options: ");
+                ImGui::SameLine();
+                ImGui::SetCursorPosX(IG_RT_W - 400);
+                ImGui::Checkbox("CSMLayerVisulization", &options.CSMLayerVisulization);
+                ImGui::SameLine();
+                ImGui::Checkbox("CSMDebug", &options.CSMDebug);
+            }
         }
         else if (options.renderType == RenderType::DEFERRED)
         {
-            ImGui::Text("GBuffer: ");
+            ImGui::Text("Deferred Shader Type: ");
             ImGui::SameLine();
-            ImGui::Checkbox("Display", &options.displayGBuffer);
-
-            if (ImGui::RadioButton("position", options.gbufferDisplayType == GbufferDisplayType::POSITION)) {
-                options.gbufferDisplayType = GbufferDisplayType::POSITION;
+            ImGui::SetCursorPosX(IG_RT_W - 400);
+            if (ImGui::RadioButton("displayGbuffer", options.dShaderType == DeferredShaderType::GBufferDisplay)) {
+                options.dShaderType = DeferredShaderType::GBufferDisplay;
             }
-            ImGui::SameLine();
 
-            if (ImGui::RadioButton("fNormal", options.gbufferDisplayType == GbufferDisplayType::NORMAL)) {
-                options.gbufferDisplayType = GbufferDisplayType::NORMAL;
-            }
-            ImGui::SameLine();
+            if (options.dShaderType == DeferredShaderType::GBufferDisplay)
+            {
+                ImGui::Text("Display info: ");
+                ImGui::SameLine();
+                ImGui::SetCursorPosX(IG_RT_W - 400);
+                if (ImGui::RadioButton("Gposition", options.gbufferDisplayType == GbufferDisplayType::POSITION)) {
+                    options.gbufferDisplayType = GbufferDisplayType::POSITION;
+                }
+                ImGui::SameLine();
 
-            if (ImGui::RadioButton("diffuse", options.gbufferDisplayType == GbufferDisplayType::DIFFUSE)) {
-                options.gbufferDisplayType = GbufferDisplayType::DIFFUSE;
-            }
-            ImGui::SameLine();
+                if (ImGui::RadioButton("GNormal", options.gbufferDisplayType == GbufferDisplayType::NORMAL)) {
+                    options.gbufferDisplayType = GbufferDisplayType::NORMAL;
+                }
+                ImGui::SameLine();
 
-            if (ImGui::RadioButton("texcoords", options.gbufferDisplayType == GbufferDisplayType::TEXCOORDS)) {
-                options.gbufferDisplayType = GbufferDisplayType::TEXCOORDS;
+                if (ImGui::RadioButton("Gdiffuse", options.gbufferDisplayType == GbufferDisplayType::DIFFUSE)) {
+                    options.gbufferDisplayType = GbufferDisplayType::DIFFUSE;
+                }
+                ImGui::SameLine();
+
+                if (ImGui::RadioButton("Gspecular", options.gbufferDisplayType == GbufferDisplayType::TEXCOORDS)) {
+                    options.gbufferDisplayType = GbufferDisplayType::TEXCOORDS;
+                }
+                ImGui::SameLine();
             }
-            ImGui::SameLine();
         }
-        
-  
     }
     ImGui::End();
 }

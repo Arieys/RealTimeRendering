@@ -1,11 +1,20 @@
 #pragma once
 
-enum RenderType {
+enum class RenderType {
     FORAWRD,
     DEFERRED
 };
 
-enum GbufferDisplayType {
+enum class ForwardShaderType {
+    Phong,
+    CSM
+};
+
+enum class DeferredShaderType {
+    GBufferDisplay,
+};
+
+enum class GbufferDisplayType {
     POSITION,
     NORMAL,
     DIFFUSE,
@@ -24,6 +33,8 @@ struct UIOptions
     bool displayNormal = false;
 
     RenderType renderType = RenderType::FORAWRD;
+    ForwardShaderType fShaderType = ForwardShaderType::CSM;
+    DeferredShaderType dShaderType = DeferredShaderType::GBufferDisplay;
     bool displayGBuffer = true;
     GbufferDisplayType gbufferDisplayType = GbufferDisplayType::POSITION;
 };

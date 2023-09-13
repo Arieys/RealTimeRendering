@@ -15,9 +15,9 @@
 #define IG_LT_W 350
 #define IG_LT_H 400
 
-#define IG_RT_X 1270
+#define IG_RT_X 1320
 #define IG_RT_Y 20
-#define IG_RT_W 650
+#define IG_RT_W 600
 #define IG_RT_H 400
 
 #define IG_LM_X 0
