@@ -46,12 +46,12 @@ add_subdirectory(./external/stb)
 set_target_properties(stb PROPERTIES FOLDER "lib")
 
 add_subdirectory(./external/imgui)
-set_target_properties(stb PROPERTIES FOLDER "lib")
+set_target_properties(imgui PROPERTIES FOLDER "lib")
 
 add_subdirectory(./external/assimp)
 set_target_properties(assimp PROPERTIES FOLDER "lib")
 
 add_subdirectory(./external/spdlog)
-set_target_properties(spdlog PROPERTIES FOLDER "lib")
+set_target_properties(spdlog PROPERTIES FOLDER "lib/spdlog")
 
 add_subdirectory(src)

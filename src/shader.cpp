@@ -449,6 +449,11 @@ glm::mat4 CSMShader::getLightSpaceMatrix(const float nearPlane, const float farP
         maxZ *= zMult;
     }
 
+    glGenerateMipmap;
+    GL_MAX_ARRAY_TEXTURE_LAYERS;
+
+    GL_MAX_TEXTURE_SIZE;
+
     const glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
     return lightProjection * lightView;
 }
