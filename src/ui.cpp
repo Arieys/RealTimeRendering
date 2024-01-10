@@ -190,7 +190,7 @@ void UI::SceneManagementGUI(Scene& scene, unique_ptr<PerspectiveCamera>& camera)
 
                     t = &scene.directionalLights[i].direction;
                     UI::ImVec4Assignment(temp, *t);
-                    ImGui::SliderFloat3("Direction", (float*)&temp, 0.0f, 10.0f);
+                    ImGui::SliderFloat3("Direction", (float*)&temp, -1.0f, 1.0f);
                     UI::glmAssignment(temp, *t);
 
                     ImGui::SliderFloat("Intensity", (float*)&scene.directionalLights[i].intensity, 0.001f, 1.0f);

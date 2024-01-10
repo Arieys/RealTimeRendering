@@ -417,7 +417,7 @@ glm::mat4 CSMShader::getLightSpaceMatrix(const float nearPlane, const float farP
     }
     center /= corners.size();
 
-    const auto lightView = glm::lookAt(center + l.direction, center, glm::vec3(0.0f, 1.0f, 0.0f));
+    const auto lightView = glm::lookAt(center + glm::normalize(l.direction), center, glm::vec3(0.0f, 1.0f, 0.0f));
 
     float minX = std::numeric_limits<float>::max();
     float maxX = std::numeric_limits<float>::lowest();
