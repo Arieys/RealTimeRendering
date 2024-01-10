@@ -188,9 +188,9 @@ void UI::SceneManagementGUI(Scene& scene, unique_ptr<PerspectiveCamera>& camera)
                     ImGui::ColorEdit3("Color", (float*)&temp);
                     UI::glmAssignment(temp, *t);
 
-                    t = &scene.directionalLights[i].position;
+                    t = &scene.directionalLights[i].direction;
                     UI::ImVec4Assignment(temp, *t);
-                    ImGui::SliderFloat3("Position", (float*)&temp, -30.0f, 30.0f);
+                    ImGui::SliderFloat3("Direction", (float*)&temp, 0.0f, 10.0f);
                     UI::glmAssignment(temp, *t);
 
                     ImGui::SliderFloat("Intensity", (float*)&scene.directionalLights[i].intensity, 0.001f, 1.0f);
@@ -398,6 +398,34 @@ void UI::SceneOptionGUI(Scene& scene, UIOptions& options)
         ImGui::SameLine();
         ImGui::SetCursorPosX(IG_RT_W - 400);
         ImGui::Checkbox("Use", &options.useNormalMap);
+
+        ImGui::Text("Log Level: ");
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(IG_RT_W - 400);
+        auto console_logger = spdlogManagement::getConsoleLogHandle();
+        if (ImGui::RadioButton("info", options.logLevel == LogLevel::INFO)) {
+            options.logLevel = LogLevel::INFO;
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("warning", options.logLevel == LogLevel::WARNING)) {
+            options.logLevel = LogLevel::WARNING;
+        }
+        ImGui::SameLine();
+        if (ImGui::RadioButton("error", options.logLevel == LogLevel::ERROR)) {
+            options.logLevel = LogLevel::ERROR;
+        }
+
+        switch (options.logLevel)
+        {
+        case LogLevel::INFO:
+            console_logger->set_level(spdlog::level::info); break;
+        case LogLevel::WARNING:
+            console_logger->set_level(spdlog::level::warn); break;
+        case LogLevel::ERROR:
+            console_logger->set_level(spdlog::level::err); break;
+        default:
+            break;
+        }
 
         ImGui::Text("Renderer type: ");
         ImGui::SameLine();

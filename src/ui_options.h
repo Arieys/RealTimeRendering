@@ -21,6 +21,12 @@ enum class GbufferDisplayType {
     TEXCOORDS
 };
 
+enum class LogLevel {
+    INFO,
+    WARNING,
+    ERROR
+};
+
 struct UIOptions
 {
     bool displayFacet = true;
@@ -32,6 +38,7 @@ struct UIOptions
     bool CSMLayerVisulization = false;
     bool displayNormal = false;
 
+    LogLevel logLevel = LogLevel::WARNING;
     RenderType renderType = RenderType::FORAWRD;
     ForwardShaderType fShaderType = ForwardShaderType::CSM;
     DeferredShaderType dShaderType = DeferredShaderType::GBufferDisplay;

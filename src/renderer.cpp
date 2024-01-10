@@ -144,7 +144,11 @@ void Renderer::deferredShading(unique_ptr<PerspectiveCamera>& camera, const Scen
 
 void Renderer::updateCamera(unique_ptr<PerspectiveCamera>& camera)
 {
-    _currentShader->updateCamera(camera);
+    auto console_logger = spdlogManagement::getConsoleLogHandle();
+
+    _currentShader->updateCamera(camera);    
+    console_logger->info("Pos = {} {} {}, Aspect = {}, fovy = {}, zfar = {}, znear = {}", camera->transform.position.x, camera->transform.position.y, camera->transform.position.z,
+        camera->aspect, camera->fovy, camera->zfar, camera->znear);
 
     _normalShader->use();
     _normalShader->setUniformMat4("projection", camera->getProjectionMatrix());

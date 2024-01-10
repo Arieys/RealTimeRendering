@@ -126,6 +126,7 @@ inline void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum se
 
     std::string log = "[" + std::string(source_str) + "][" + type_str + "] " + msg;
 
+    auto lastLevel = console_logger->level();
     if(debugCtr.showWarningInfo && debugCtr.showNotificationInfo) console_logger->set_level(spdlog::level::info);
     else if(debugCtr.showWarningInfo) console_logger->set_level(spdlog::level::warn);
     else console_logger->set_level(spdlog::level::info);
@@ -154,5 +155,5 @@ inline void OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum se
 
         }
     }
-    
+    console_logger->set_level(lastLevel);
 }
